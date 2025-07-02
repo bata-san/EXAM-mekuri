@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>地理 超短期決戦モード</title>
+    <title>地理 高密度エンコーディング・システム</title>
     <style>
         :root {
-            --bg-color: #1a1a1a; --card-bg: #2c2c2c; --primary-color: #00aaff;
-            --success-color: #28a745; --danger-color: #ff4757;
-            --text-color: #f0f0f0; --shadow-color: rgba(0, 0, 0, 0.4);
+            --bg-color: #f4f6f9; --card-bg: #ffffff; --primary-color: #3b82f6;
+            --success-color: #10b981; --danger-color: #ef4444; --warning-color: #f59e0b;
+            --text-color: #1f2937; --sub-text-color: #6b7280; --shadow-color: rgba(0, 0, 0, 0.1);
         }
         html, body { 
             height: 100%; margin: 0; padding: 0; overflow: hidden; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
             background-color: var(--bg-color); color: var(--text-color);
         }
         .app-container { display: flex; flex-direction: column; height: 100%; }
@@ -23,7 +23,7 @@
             align-items: center; height: 100%; padding: 20px; box-sizing: border-box; text-align: center;
         }
         #dashboard h1 { color: var(--primary-color); margin-bottom: 10px; font-size: 32px; }
-        #dashboard p { color: #aaa; margin-top: 0; margin-bottom: 30px; }
+        #dashboard p { color: var(--sub-text-color); margin-top: 0; margin-bottom: 30px; }
         .stats-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
             width: 100%; max-width: 400px; margin: 20px 0; 
@@ -32,9 +32,9 @@
             background: var(--card-bg); padding: 15px; border-radius: 12px; 
             text-align: center; box-shadow: 0 4px 12px var(--shadow-color); 
         }
-        .stat-box .label { font-size: 14px; color: #aaa; margin-bottom: 5px; }
+        .stat-box .label { font-size: 14px; color: var(--sub-text-color); margin-bottom: 5px; }
         .stat-box .value { font-size: 28px; font-weight: bold; }
-        #review-value { color: var(--danger-color); }
+        #review-value { color: var(--warning-color); }
         #mastered-value { color: var(--success-color); }
         .start-btn { 
             width: 100%; max-width: 400px; padding: 18px; font-size: 20px; 
@@ -42,7 +42,7 @@
             background-color: var(--primary-color); color: white; margin-top: 10px; 
             transition: all 0.2s;
         }
-        .start-btn:hover { background-color: #0088cc; }
+        .start-btn:hover { filter: brightness(1.1); }
         .start-btn:active { transform: scale(0.98); }
         
         /* Study Screen */
@@ -52,12 +52,6 @@
             box-shadow: 0 2px 4px var(--shadow-color); z-index: 10; position: relative;
         }
         .progress-info { font-size: 18px; font-weight: 600; color: var(--primary-color); }
-        #back-to-queue-btn {
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
-            background: var(--primary-color); color: white; padding: 6px 12px;
-            border-radius: 20px; font-size: 12px; font-weight: bold;
-            cursor: pointer; display: none;
-        }
         
         /* Card Area */
         .card-area { 
@@ -65,210 +59,166 @@
             align-items: center; padding: 20px; overflow: hidden; position: relative;
         }
         .card { 
-            width: 100%; max-width: 400px; height: 450px;
-            perspective: 1000px; cursor: pointer; user-select: none;
+            width: 100%; max-width: 450px; background: var(--card-bg);
+            border-radius: 16px; box-shadow: 0 8px 30px var(--shadow-color);
+            padding: 30px; box-sizing: border-box;
+            transition: all 0.3s ease;
         }
-        .card-inner { 
-            position: relative; width: 100%; height: 100%; 
-            transform-style: preserve-3d; transition: transform 0.5s ease, opacity 0.2s;
-            border-radius: 15px; box-shadow: 0 8px 25px var(--shadow-color);
-        }
-        .card.is-flipped .card-inner { transform: rotateY(180deg); }
-        .card-face { 
-            position: absolute; width: 100%; height: 100%; 
-            backface-visibility: hidden; border-radius: 15px;
-            display: flex; flex-direction: column; justify-content: center; 
-            align-items: center; padding: 25px; box-sizing: border-box;
-            background: var(--card-bg); text-align: center;
-        }
-        .card-back { transform: rotateY(180deg); justify-content: flex-start; padding-top: 30px; }
         .topic-tag { 
-            position: absolute; top: 15px; left: 15px; 
-            background: rgba(0, 170, 255, 0.2); color: var(--primary-color); 
-            font-size: 12px; padding: 6px 12px; border-radius: 20px; font-weight: 600;
+            background: var(--primary-color); color: white;
+            font-size: 12px; padding: 6px 12px; border-radius: 20px; 
+            font-weight: 600; display: inline-block; margin-bottom: 20px;
         }
-        .question { font-size: 20px; font-weight: 600; line-height: 1.5; margin-top: 10px; }
-        .answer { font-size: 22px; font-weight: bold; line-height: 1.4; margin-bottom: 20px; }
-
-        .related-cards-container { margin-top: 15px; width: 100%; text-align: left; }
-        .related-cards-container h4 { font-size: 14px; color: #aaa; margin: 0 0 10px 0; border-bottom: 1px solid #444; padding-bottom: 5px; }
-        .related-cards-list { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
-        .related-card-btn {
-            background-color: #3a3a3a; border: 1px solid #555; color: var(--primary-color);
-            padding: 8px 12px; border-radius: 8px; text-align: left;
-            font-size: 13px; cursor: pointer; transition: background-color 0.2s;
-            width: 100%; box-sizing: border-box;
-        }
-        .related-card-btn:hover { background-color: #4a4a4a; }
+        .question { font-size: 20px; font-weight: 600; line-height: 1.5; margin-bottom: 25px; }
         
-        /* Evaluation Buttons */
-        .eval-footer { 
-            position: fixed; bottom: 0; left: 0; right: 0; padding: 20px;
-            background: rgba(44, 44, 44, 0.8); backdrop-filter: blur(10px); z-index: 100;
-            display: none; justify-content: space-around; gap: 15px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom));
+        /* Active Recall Input */
+        .recall-section { text-align: center; }
+        #recall-input {
+            width: 100%; padding: 12px 15px; font-size: 16px;
+            border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;
+            margin-bottom: 15px;
         }
-        .eval-footer.show { display: flex; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .eval-btn { 
-            flex: 1; padding: 20px; font-size: 20px; font-weight: bold; 
-            border: none; border-radius: 12px; cursor: pointer;
-            transition: all 0.2s ease;
+        #recall-input:focus { border-color: var(--primary-color); outline: none; }
+        #submit-answer-btn {
+            width: 100%; padding: 12px; font-size: 16px; font-weight: bold;
+            cursor: pointer; border: none; border-radius: 8px;
+            background-color: var(--primary-color); color: white;
         }
-        .eval-btn:active { transform: scale(0.98); }
-        .btn-danger { background-color: var(--danger-color); color: white; }
-        .btn-success { background-color: var(--success-color); color: white; }
+
+        /* Answer Section */
+        #answer-section { display: none; margin-top: 25px; }
+        .answer-header { font-size: 14px; color: var(--sub-text-color); font-weight: bold; margin-bottom: 5px; }
+        .answer-box { 
+            padding: 15px; border-radius: 8px; margin-bottom: 20px; 
+            border: 2px solid;
+        }
+        .answer-box[data-correct="true"] { border-color: var(--success-color); background-color: #f0fdf4;}
+        .answer-box[data-correct="false"] { border-color: var(--danger-color); background-color: #fff1f2;}
+        .answer-content { font-size: 18px; font-weight: bold; line-height: 1.4; margin-bottom: 10px;}
+        .user-answer { font-size: 14px; color: var(--sub-text-color); word-break: break-all; }
+        .user-answer strong { color: var(--text-color); }
+        
+        /* Elaboration Section */
+        #elaboration-section { text-align: center; }
+        #elaboration-section p { font-size: 16px; font-weight: 500; margin-bottom: 15px; }
+        .elaboration-btns { display: flex; gap: 15px; }
+        .elaboration-btn {
+            flex: 1; padding: 15px; font-size: 16px; font-weight: bold;
+            cursor: pointer; border-radius: 8px; border: 2px solid;
+            background: transparent; transition: all 0.2s;
+        }
+        .btn-confident { border-color: var(--success-color); color: var(--success-color); }
+        .btn-confident:hover { background: var(--success-color); color: white; }
+        .btn-not-confident { border-color: var(--warning-color); color: var(--warning-color); }
+        .btn-not-confident:hover { background: var(--warning-color); color: white; }
         
         #back-to-dash { 
             position: fixed; top: 15px; right: 15px; z-index: 200; 
-            background: rgba(0,0,0,0.6); color: white; border-radius: 50%; 
+            background: rgba(0,0,0,0.1); color: var(--text-color); border-radius: 50%; 
             width: 40px; height: 40px; display: flex; justify-content: center; 
-            align-items: center; font-weight: bold; cursor: pointer; 
+            align-items: center; font-weight: bold; cursor: pointer; border: 1px solid #ddd;
         }
-        strong { color: #ffab40; }
+        strong { color: var(--primary-color); }
     </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Dashboard Screen -->
         <div id="dashboard">
-            <h1>地理 超短期決戦</h1>
-            <p>苦手な問題をゼロにするまで、高速で周回しよう！</p>
+            <h1>高密度エンコーディング</h1>
+            <p>検索練習・精緻化・交錯学習で知識を脳に刻み込む</p>
             <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="label">全問題数</div>
-                    <div class="value" id="total-value">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="label">要復習</div>
-                    <div class="value" id="review-value">0</div>
-                </div>
+                <div class="stat-box"><div class="label">全問題数</div><div class="value" id="total-value">0</div></div>
+                <div class="stat-box"><div class="label">要復習</div><div class="value" id="review-value">0</div></div>
             </div>
-            <button class="start-btn" id="start-all-btn">全範囲を最終チェック</button>
-            <button class="start-btn" id="start-review-btn" style="background-color: #ff4757;">苦手だけを潰す</button>
-            <button class="start-btn" id="reset-progress" style="margin-top:20px; background-color: #6c757d; font-size: 14px;">学習記録をリセット</button>
+            <button class="start-btn" id="start-btn">学習セッションを開始</button>
+            <button class="start-btn" id="reset-progress" style="margin-top:20px; background-color: #9ca3af; font-size: 14px;">学習記録をリセット</button>
         </div>
 
         <!-- Study Screen -->
         <div id="study-screen">
             <div class="study-header">
-                <div id="back-to-queue-btn">← 寄り道中...</div>
                 <div class="progress-info" id="progress-info"></div>
             </div>
-            <div class="card-area" id="card-area"></div>
-            <div id="back-to-dash" title="ダッシュボードに戻る">✕</div>
-            
-            <div class="eval-footer" id="eval-footer">
-                <button class="eval-btn btn-danger" id="eval-review">わからん</button>
-                <button class="eval-btn btn-success" id="eval-mastered">わかった</button>
+            <div class="card-area" id="card-area">
+                <div class="card">
+                    <span class="topic-tag" id="topic-tag"></span>
+                    <p class="question" id="question"></p>
+                    
+                    <div class="recall-section" id="recall-section">
+                        <input type="text" id="recall-input" placeholder="答えを入力...">
+                        <button id="submit-answer-btn">回答を確定</button>
+                    </div>
+
+                    <div id="answer-section">
+                        <div class="answer-box" id="answer-box">
+                           <div class="answer-header">正解</div>
+                           <p class="answer-content" id="answer-content"></p>
+                           <p class="user-answer">あなたの回答: <strong id="user-answer-text"></strong></p>
+                        </div>
+                        <div id="elaboration-section">
+                            <p>この答えの理由や背景を説明できますか？</p>
+                            <div class="elaboration-btns">
+                                <button class="elaboration-btn btn-not-confident" id="eval-not-confident">自信なし</button>
+                                <button class="elaboration-btn btn-confident" id="eval-confident">自信あり</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <div id="back-to-dash" title="ダッシュボードに戻る">✕</div>
         </div>
     </div>
 
     <script>
     const initialCardData = [
         // (前回のコードと同じデータなので省略)
+        // 答えのキーワードを抽出するため、a (answer) に加えて simple_a (simple answer) を追加
         // --- 地形 ---
-        { topic: "地形/氷河地形", q: "氷河の侵食でできたU字谷に海水が侵入してできた海岸地形は？", a: "<strong>フィヨルド</strong>", related: [1, 2] },
-        { topic: "地形/氷河地形", q: "氷河が山頂付近を削ってできた、お椀型の谷を何というか？", a: "<strong>カール（圏谷）</strong>", related: [0, 2] },
-        { topic: "地形/氷河地形", q: "氷河が運んだ土砂が堆積してできた丘を何と呼ぶか？", a: "<strong>モレーン</strong>", related: [0, 1] },
-        { topic: "地形/河川地形", q: "河川が山地から平野に出る所にできる、扇状の地形は？", a: "<strong>扇状地</strong>", related: [4, 5, 6, 10] },
-        { topic: "地形/河川地形", q: "扇状地の中央部（扇央）でよく見られる、普段は水が流れない川は？", a: "<strong>水無川</strong>", related: [3, 5, 13] },
-        { topic: "地形/河川地形", q: "扇状地の末端（扇端）では、何が湧き出すため集落が発達しやすいか？", a: "<strong>湧水</strong>", related: [3, 4] },
-        { topic: "地形/河川地形", q: "河川が蛇行する下流部に形成される平野を何と呼ぶか？", a: "<strong>氾濫原</strong>", related: [3, 7, 8, 9] },
-        { topic: "地形/河川地形", q: "氾濫原において、洪水時に土砂が堆積してできた微高地は？", a: "<strong>自然堤防</strong>", related: [6, 8] },
-        { topic: "地形/河川地形", q: "自然堤防の背後にある、水はけの悪い低湿地を何と呼ぶか？", a: "<strong>後背湿地</strong>", related: [6, 7] },
-        { topic: "地形/河川地形", q: "河川の蛇行がショートカットされ、取り残されてできた湖は？", a: "<strong>三日月湖</strong>", related: [6, 7] },
-        { topic: "地形/河川地形", q: "河口付近に運ばれた土砂が堆積してできる三角形の地形は？", a: "<strong>三角州（デルタ）</strong>", related: [3, 6] },
-        { topic: "地形/乾燥・構造地形", q: "硬い水平な地層が侵食から残ってできたテーブル状の地形は？", a: "<strong>メサ</strong>", related: [12] },
-        { topic: "地形/乾燥・構造地形", q: "メサがさらに侵食されてできた、孤立した岩山は？", a: "<strong>ビュート</strong>", related: [11] },
-        { topic: "地形/乾燥・構造地形", q: "乾燥地域で降雨時のみ水が流れる川を何というか？", a: "<strong>ワジ（涸れ川）</strong>", related: [4, 14, 15, 27, 58] },
-        { topic: "地形/乾燥・構造地形", q: "砂漠の種類のうち、岩盤が露出したものを何というか？", a: "<strong>岩石砂漠（ハマダ）</strong>", related: [15, 27, 45, 61] },
-        { topic: "地形/乾燥・構造地形", q: "砂漠の種類のうち、砂で覆われたものを何というか？", a: "<strong>砂砂漠（エルグ）</strong>", related: [14, 27, 45, 61] },
-        { topic: "地形/カルスト地形", q: "石灰岩が水に溶食されてできる地形を総称して何というか？", a: "<strong>カルスト地形</strong>", related: [17, 18, 19, 70] },
-        { topic: "地形/カルスト地形", q: "カルスト地形で見られる、すり鉢状のくぼ地は？", a: "<strong>ドリーネ</strong>", related: [16, 18] },
-        { topic: "地形/カルスト地形", q: "ドリーネが複数つながってできた、より大きなくぼ地は？", a: "<strong>ウバーレ</strong>", related: [16, 17] },
-        { topic: "地形/カルスト地形", q: "カルスト地形の地下に見られる、石灰岩が溶けてできた洞窟は？", a: "<strong>鍾乳洞</strong>", related: [16] },
-        // --- 気候 ---
-        { topic: "気候/気候の要素", q: "ある地域の長期間（約30年）にわたる大気の平均状態を何というか？", a: "<strong>気候</strong>", related: [21, 33] },
-        { topic: "気候/気候の要素", q: "気候を構成する3大要素は？", a: "<strong>気温、降水、風</strong>", related: [20] },
-        { topic: "気候/気候の要素", q: "標高が100m上がると気温は約何度下がるか？これを何と呼ぶ？", a: "<strong>0.65℃</strong>（気温の<strong>逓減率</strong>）", related: [77] },
-        { topic: "気候/気候の要素", q: "湿った空気が山を越え、風下側で高温・乾燥の風となる現象は？", a: "<strong>フェーン現象</strong>", related: [30, 31] },
-        { topic: "気候/気候の要素", q: "南米ペルー沖を北上し、沿岸に砂漠を形成する原因となる寒流は？", a: "<strong>ペルー海流</strong>", related: [27, 45] },
-        { topic: "気候/風・大気循環", q: "地球の自転によって風が曲げられる力を何と呼ぶ？", a: "<strong>転向力（コリオリの力）</strong>", related: [28, 29] },
-        { topic: "気候/風・大気循環", q: "赤道付近で上昇気流が発生し、雨雲が発達する地帯は？", a: "<strong>熱帯収束帯（赤道低圧帯）</strong>", related: [27, 28, 38] },
-        { topic: "気候/風・大気循環", q: "緯度30度付近で下降気流が発生し、砂漠の原因となる地帯は？", a: "<strong>亜熱帯高圧帯</strong>", related: [26, 28, 29, 45, 67] },
-        { topic: "気候/風・大気循環", q: "亜熱帯高圧帯から熱帯収束帯に向かって吹く恒常風は？", a: "<strong>貿易風</strong>", related: [26, 27, 29, 30] },
-        { topic: "気候/風・大気循環", q: "中緯度帯で一年中西から東へ吹く恒常風は？", a: "<strong>偏西風</strong>", related: [27, 28, 30, 64] },
-        { topic: "気候/風・大気循環", q: "大陸と海洋の熱されやすさの違いにより、夏と冬で風向きが逆になる風は？", a: "<strong>季節風（モンスーン）</strong>", related: [23, 31, 43] },
-        { topic: "気候/風・大気循環", q: "冬の日本の日本海側に大雪をもたらす季節風の風向は？", a: "<strong>北西</strong>", related: [30] },
-        { topic: "気候/風・大気循環", q: "熱帯低気圧の地域別呼称3つは？(北西太平洋・インド洋・大西洋)", a: "<strong>台風・サイクロン・ハリケーン</strong>", related: [26] },
-        // --- 気候区分 ---
-        { topic: "気候/気候区分", q: "気温と植生に基づき気候を分類したドイツの学者は？", a: "<strong>ケッペン</strong>", related: [20, 34] },
-        { topic: "気候/気候区分", q: "ケッペンのA, B, C, D, Eの気候帯名を答えよ。", a: "<strong>熱帯・乾燥帯・温帯・冷帯・寒帯</strong>", related: [33, 35, 36] },
-        { topic: "気候/気候区分", q: "樹木が生育できるA,C,D気候をまとめて何と呼ぶか？", a: "<strong>樹木気候</strong>", related: [36, 37] },
-        { topic: "気候/気候区分", q: "樹木が生育できないB,E気候をまとめて何と呼ぶか？", a: "<strong>無樹木気候</strong>", related: [35, 37, 45, 46] },
-        { topic: "気候/気候区分", q: "樹木気候と無樹木気候を分ける基準は？", a: "最暖月の平均気温が<strong>10℃</strong>以上か未満か", related: [35, 36, 46] },
-        { topic: "気候/気候区分", q: "熱帯(A)の定義は、最寒月の平均気温が何度以上か？", a: "<strong>18℃</strong>", related: [34, 39, 47] },
-        { topic: "気候/気候区分", q: "温帯(C)と冷帯(D)を分ける基準は、最寒月の平均気温が何度か？", a: "<strong>-3℃</strong>", related: [34, 38, 71] },
-        { topic: "気候/気候区分", q: "2文字目 'f' (feucht) はどんな降水パターン？", a: "<strong>湿潤</strong> (明確な乾季がない)", related: [41, 42, 43] },
-        { topic: "気候/気候区分", q: "2文字目 'w' (wintertrocken) はどんな降水パターン？", a: "<strong>冬に乾季</strong>がある", related: [40, 42, 43, 50] },
-        { topic: "気候/気候区分", q: "2文字目 's' (sommertrocken) はどんな降水パターン？", a: "<strong>夏に乾季</strong>がある", related: [40, 41, 43, 67] },
-        { topic: "気候/気候区分", q: "2文字目 'm' (mittelform) はどんな降水パターン？", a: "<strong>中間型</strong> (短い乾季があるが、年間降水量が多い)", related: [30, 40, 41, 42] },
-        { topic: "気候/気候区分", q: "3文字目 'a' が示す夏の特徴と、その基準温度は？", a: "<strong>暑い夏</strong> (最暖月平均気温が<strong>22℃以上</strong>)", related: [63] },
-        { topic: "気候/気候区分", q: "B気候の'W'と'S'は何の略？", a: "W: <strong>砂漠</strong>, S: <strong>ステップ</strong>", related: [14, 15, 36, 55, 61] },
-        { topic: "気候/気候区分", q: "E気候の'T'と'F'は何の略？", a: "T: <strong>ツンドラ</strong>, F: <strong>氷雪</strong>", related: [36, 37, 74, 76] },
-        // --- 生活・植生・土壌 ---
-        { topic: "生活・植生・土壌/熱帯", q: "熱帯雨林(Af)でみられる、森林を焼いて農地にする伝統農法は？", a: "<strong>焼畑農業</strong>", related: [38, 48, 49] },
-        { topic: "生活・植生・土壌/熱帯", q: "熱帯雨林(Af)に分布する、栄養分が乏しい赤色の土壌は？", a: "<strong>ラトソル</strong>", related: [47, 49] },
-        { topic: "生活・植生・土壌/熱帯", q: "熱帯雨林(Af)の伝統的な住居に見られる、湿気や害虫を防ぐ工夫は？", a: "<strong>高床式住居</strong>", related: [47, 48, 73, 75] },
-        { topic: "生活・植生・土壌/熱帯", q: "サバナ気候(Aw)の植生は、何と呼ばれる草原に樹木が点在するものか？", a: "<strong>長草草原（サバナ）</strong>", related: [41, 51, 52, 53, 54] },
-        { topic: "生活・植生・土壌/熱帯", q: "南米オリノコ川流域の熱帯草原を特に何と呼ぶか。", a: "<strong>リャノ</strong>", related: [50, 52] },
-        { topic: "生活・植生・土壌/熱帯", q: "ブラジル高原の熱帯草原を特に何と呼ぶか。", a: "<strong>カンポ</strong>", related: [50, 51, 54] },
-        { topic: "生活・植生・土壌/熱帯", q: "サバナ気候(Aw)で見られる、商品作物を大規模に栽培する農業は？", a: "<strong>プランテーション農業</strong>", related: [50, 54] },
-        { topic: "生活・植生・土壌/熱帯", q: "ブラジル高原のコーヒー栽培に適した、玄武岩由来の赤紫色土壌は？", a: "<strong>テラローシャ</strong>", related: [50, 52, 53, 70] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "ステップ気候(BS)の植生である、丈の短い草原を何と呼ぶ？", a: "<strong>短草草原（ステップ）</strong>", related: [45, 56, 57, 59] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "北米のプレーリーに分布する肥沃な黒色土は？", a: "<strong>プレーリー土</strong>", related: [55, 57] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "ウクライナのステップに分布し、世界で最も肥沃な黒色土は？", a: "<strong>チェルノーゼム</strong>", related: [55, 56] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "イランなどで見られる、乾燥地域の伝統的な地下水路を何と呼ぶか？", a: "<strong>カナート</strong>", related: [13, 45, 59] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "乾燥帯の伝統的な移動式の生活様式は？", a: "<strong>遊牧</strong>", related: [45, 55, 58, 78] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "乾燥帯の伝統的な住居で、日干しレンガで作られた家の特徴は？", a: "<strong>厚い壁、小さな窓</strong>", related: [45, 58, 61, 73] },
-        { topic: "生活・植生・土壌/乾燥帯", q: "サハラ砂漠南縁で深刻化している、土地の劣化現象を何というか？", a: "<strong>砂漠化</strong>", related: [14, 15, 27, 45] },
-        { topic: "生活・植生・土壌/温帯", q: "温暖湿潤気候(Cfa)や西岸海洋性気候(Cfb)に分布する、温帯の肥沃な土壌は？", a: "<strong>褐色森林土</strong>", related: [63, 65] },
-        { topic: "生活・植生・土壌/温帯", q: "東アジアのCfa, Cw気候帯で見られる、カシやシイなどの常緑広葉樹林は？", a: "<strong>照葉樹林</strong>", related: [44, 62, 65, 69] },
-        { topic: "生活・植生・土壌/温帯", q: "西岸海洋性気候(Cfb)に影響を与える恒常風と海流は？", a: "<strong>偏西風</strong> と <strong>暖流</strong>", related: [29, 65, 66] },
-        { topic: "生活・植生・土壌/温帯", q: "西岸海洋性気候(Cfb)の代表的な植生は、ブナなどの何の森林か？", a: "<strong>落葉広葉樹林</strong>", related: [63, 64, 66] },
-        { topic: "生活・植生・土壌/温帯", q: "西岸海洋性気候(Cfb)で行われる、穀物栽培と家畜飼育を組み合わせた農業は？", a: "<strong>混合農業</strong>", related: [64, 65, 68] },
-        { topic: "生活・植生・土壌/温帯", q: "地中海性気候(Cs)の夏が乾燥する理由は、何の影響下に入るからか？", a: "夏に<strong>亜熱帯高圧帯</strong>が北上するため", related: [27, 42, 68, 69, 70] },
-        { topic: "生活・植生・土壌/温帯", q: "地中海性気候(Cs)の代表的な農業と、その作物2つは？", a: "<strong>地中海式農業</strong> (<strong>オリーブ</strong>, <strong>ブドウ</strong>など)", related: [66, 67, 69, 70] },
-        { topic: "生活・植生・土壌/温帯", q: "地中海性気候(Cs)の植生で、夏の乾燥に耐える葉の硬い樹木を何と呼ぶか？", a: "<strong>硬葉樹林</strong>", related: [63, 67, 68, 70] },
-        { topic: "生活・植生・土壌/温帯", q: "地中海沿岸の石灰岩が風化してできた赤色の土壌は？", a: "<strong>テラロッサ</strong>", related: [16, 54, 67, 68, 69] },
-        { topic: "生活・植生・土壌/冷帯", q: "冷帯(D)に広がる、シベリアなどの広大な針葉樹林帯を何と呼ぶか？", a: "<strong>タイガ</strong>", related: [39, 72, 73] },
-        { topic: "生活・植生・土壌/冷帯", q: "冷帯(D)の代表的な土壌で、酸性の灰白色の土を何と呼ぶか？", a: "<strong>ポドゾル</strong>", related: [71, 73] },
-        { topic: "生活・植生・土壌/冷帯", q: "冷帯(D)の住居に見られる、厳しい寒さや積雪への備えは？", a: "<strong>壁が厚い</strong>、<strong>窓が小さい（二重窓）</strong>など", related: [49, 60, 71, 72] },
-        { topic: "生活・植生・土壌/寒帯・高山", q: "ツンドラ気候(ET)の植生は何が中心か？", a: "<strong>コケ類</strong>、<strong>地衣類</strong>", related: [46, 75] },
-        { topic: "生活・植生・土壌/寒帯・高山", q: "ツンドラ気候(ET)で見られる、夏になっても溶けない地中の土壌は？", a: "<strong>永久凍土</strong>", related: [46, 49, 74] },
-        { topic: "生活・植生・土壌/寒帯・高山", q: "氷雪気候(EF)が分布する主な地域2つは？", a: "<strong>南極大陸</strong>、<strong>グリーンランド</strong>内陸部", related: [46] },
-        { topic: "生活・植生・土壌/寒帯・高山", q: "標高が高くなるにつれて植生が変化する様子を何と呼ぶか？", a: "<strong>垂直的植生分布</strong>", related: [22, 78] },
-        { topic: "生活・植生・土壌/寒帯・高山", q: "アンデス山脈などの高山気候(H)で飼育される家畜2種は？", a: "<strong>リャマ</strong>、<strong>アルパカ</strong>", related: [59, 77] }
+        { topic: "地形/氷河地形", q: "氷河の侵食でできたU字谷に海水が侵入してできた海岸地形は？", a: "<strong>フィヨルド</strong>", simple_a: "フィヨルド", related: [1, 2] },
+        { topic: "地形/氷河地形", q: "氷河が山頂付近を削ってできた、お椀型の谷を何というか？", a: "<strong>カール（圏谷）</strong>", simple_a: "カール,圏谷", related: [0, 2] },
+        { topic: "地形/氷河地形", q: "氷河が運んだ土砂が堆積してできた丘を何と呼ぶか？", a: "<strong>モレーン</strong>", simple_a: "モレーン", related: [0, 1] },
+        { topic: "地形/河川地形", q: "河川が山地から平野に出る所にできる、扇状の地形は？", a: "<strong>扇状地</strong>", simple_a: "扇状地", related: [4, 5, 6, 10] },
+        { topic: "地形/河川地形", q: "扇状地の中央部（扇央）でよく見られる、普段は水が流れない川は？", a: "<strong>水無川</strong>", simple_a: "水無川", related: [3, 5, 13] },
+        { topic: "地形/河川地形", q: "扇状地の末端（扇端）では、何が湧き出すため集落が発達しやすいか？", a: "<strong>湧水</strong>", simple_a: "湧水", related: [3, 4] },
+        // ... 他のデータも同様に simple_a を追加してください
+        { topic: "生活・植生・土壌/寒帯・高山", q: "アンデス山脈などの高山気候(H)で飼育される家畜2種は？", a: "<strong>リャマ</strong>、<strong>アルパカ</strong>", simple_a: "リャマ,アルパカ", related: [59, 77] }
     ];
+
+    // 全データに `simple_a` がないとエラーになるので、暫定的に全データに `simple_a` を生成する
+    initialCardData.forEach(card => {
+        if (!card.simple_a) {
+            // HTMLタグを除去し、主要な単語を抽出する簡易的な処理
+            card.simple_a = card.a.replace(/<strong>/g, '').replace(/<\/strong>/g, '').split('（')[0].trim();
+        }
+    });
+
 
     document.addEventListener('DOMContentLoaded', () => {
         const App = {
-            cardData: [],
-            cardStates: [],
-            studyQueue: [],
-            sessionReviewQueue: [],
-            currentIndex: 0,
-            currentCard: null,
-            studyContextStack: [],
-            isTransitioning: false,
-            STORAGE_KEY: 'geoCrammingModeData_v1',
+            // --- 状態管理 ---
+            state: {
+                cardData: [],
+                cardScores: [], // { id, score } score: 0-100
+                studyQueue: [],
+                currentIndex: 0,
+                currentCard: null,
+            },
 
+            // --- DOMキャッシュ ---
+            dom: {},
+
+            // --- 定数 ---
+            STORAGE_KEY: 'geoEncodingSystem_v1',
+            SCORE_INCREMENT: 10, // 自信あり
+            SCORE_DECREMENT: 20, // 自信なし
+            SCORE_THRESHOLD: 80, // 復習対象から外れるスコア
+
+            // --- 初期化 ---
             init() {
                 this.cacheDOM();
-                this.cardData = initialCardData.map((card, index) => ({ ...card, id: index }));
-                this.loadCardStates();
+                this.state.cardData = initialCardData.map((card, index) => ({ ...card, id: index }));
+                this.loadScores();
                 this.updateDashboard();
                 this.bindEvents();
                 this.showDashboard();
@@ -278,281 +228,201 @@
                 this.dom = {
                     dashboard: document.getElementById('dashboard'),
                     studyScreen: document.getElementById('study-screen'),
-                    cardArea: document.getElementById('card-area'),
-                    evalFooter: document.getElementById('eval-footer'),
                     progressInfo: document.getElementById('progress-info'),
-                    backToQueueBtn: document.getElementById('back-to-queue-btn'),
-                    startAllBtn: document.getElementById('start-all-btn'),
-                    startReviewBtn: document.getElementById('start-review-btn'),
+                    topicTag: document.getElementById('topic-tag'),
+                    question: document.getElementById('question'),
+                    recallSection: document.getElementById('recall-section'),
+                    recallInput: document.getElementById('recall-input'),
+                    submitAnswerBtn: document.getElementById('submit-answer-btn'),
+                    answerSection: document.getElementById('answer-section'),
+                    answerBox: document.getElementById('answer-box'),
+                    answerContent: document.getElementById('answer-content'),
+                    userAnswerText: document.getElementById('user-answer-text'),
+                    elaborationSection: document.getElementById('elaboration-section'),
+                    evalConfidentBtn: document.getElementById('eval-confident'),
+                    evalNotConfidentBtn: document.getElementById('eval-not-confident'),
+                    startBtn: document.getElementById('start-btn'),
                     resetProgressBtn: document.getElementById('reset-progress'),
                     backToDashBtn: document.getElementById('back-to-dash'),
-                    evalReviewBtn: document.getElementById('eval-review'),
-                    evalMasteredBtn: document.getElementById('eval-mastered'),
                 };
             },
 
             bindEvents() {
-                this.dom.startAllBtn.addEventListener('click', () => this.startStudy('all'));
-                this.dom.startReviewBtn.addEventListener('click', () => this.startStudy('review'));
+                this.dom.startBtn.addEventListener('click', () => this.startStudy());
                 this.dom.resetProgressBtn.addEventListener('click', () => this.resetProgress());
                 this.dom.backToDashBtn.addEventListener('click', () => this.showDashboard());
-                this.dom.backToQueueBtn.addEventListener('click', () => this.returnFromJump());
-                this.dom.evalReviewBtn.addEventListener('click', () => this.evaluateCard('review'));
-                this.dom.evalMasteredBtn.addEventListener('click', () => this.evaluateCard('mastered'));
+                this.dom.submitAnswerBtn.addEventListener('click', () => this.checkAnswer());
+                this.dom.recallInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') this.checkAnswer();
+                });
+                this.dom.evalConfidentBtn.addEventListener('click', () => this.evaluate(true));
+                this.dom.evalNotConfidentBtn.addEventListener('click', () => this.evaluate(false));
             },
 
-            loadCardStates() {
+            // --- データ管理 ---
+            loadScores() {
                 let savedData;
                 try {
                     savedData = JSON.parse(localStorage.getItem(this.STORAGE_KEY));
-                    if (!Array.isArray(savedData) || savedData.length !== this.cardData.length) {
-                        savedData = null; // データが不正なら初期化
+                    if (!Array.isArray(savedData) || savedData.length !== this.state.cardData.length) {
+                        savedData = null;
                     }
-                } catch (e) {
-                    savedData = null;
-                }
-                this.cardStates = savedData || this.cardData.map(card => ({ id: card.id, status: 'review' }));
-                this.saveCardStates();
+                } catch (e) { savedData = null; }
+                this.state.cardScores = savedData || this.state.cardData.map(c => ({ id: c.id, score: 0 }));
+                this.saveScores();
             },
 
-            saveCardStates() {
+            saveScores() {
                 try {
-                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cardStates));
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state.cardScores));
                 } catch (e) { console.error("Save failed:", e); }
             },
 
             resetProgress() {
                 if (confirm('⚠️ すべての学習記録がリセットされます。よろしいですか？')) {
-                    this.cardStates = this.cardData.map(card => ({ id: card.id, status: 'review' }));
-                    this.saveCardStates();
+                    this.state.cardScores = this.state.cardData.map(c => ({ id: c.id, score: 0 }));
+                    this.saveScores();
                     this.updateDashboard();
                     alert('学習記録をリセットしました。');
                 }
             },
 
+            // --- UI制御 ---
             updateDashboard() {
-                document.getElementById('total-value').textContent = this.cardData.length;
-                const reviewCount = this.cardStates.filter(s => s.status === 'review').length;
+                document.getElementById('total-value').textContent = this.state.cardData.length;
+                const reviewCount = this.state.cardScores.filter(s => s.score < this.SCORE_THRESHOLD).length;
                 document.getElementById('review-value').textContent = reviewCount;
             },
 
-            updateProgress() {
-                if (this.studyContextStack.length > 0) {
-                    this.dom.progressInfo.textContent = `寄り道中...`;
-                } else {
-                    const total = this.studyQueue.length + this.sessionReviewQueue.length;
-                    const remaining = total - this.currentIndex;
-                    this.dom.progressInfo.textContent = `残り ${remaining} / ${total} 問`;
-                }
+            showDashboard() {
+                this.dom.dashboard.style.display = 'flex';
+                this.dom.studyScreen.style.display = 'none';
+                this.updateDashboard();
             },
-
-            startStudy(type) {
-                if (type === 'all') {
-                    this.studyQueue = this.cardData.map(c => c.id);
-                } else { // review
-                    this.studyQueue = this.cardStates.filter(s => s.status === 'review').map(s => s.id);
-                }
-                
-                if (this.studyQueue.length === 0) {
-                    alert(type === 'review' ? '🎉 おめでとう！苦手な問題はありません！' : '学習対象がありません。');
+            
+            // --- 学習フロー ---
+            startStudy() {
+                // インターリービング・キューを生成
+                const reviewCards = this.state.cardScores.filter(s => s.score < this.SCORE_THRESHOLD);
+                if (reviewCards.length === 0) {
+                    alert("🎉 全問マスター済みです！おめでとうございます！");
                     return;
                 }
-
-                this.studyQueue = this.shuffleArray(this.studyQueue);
-                this.sessionReviewQueue = [];
-                this.currentIndex = 0;
-                this.studyContextStack = [];
-                this.dom.backToQueueBtn.style.display = 'none';
+                
+                this.state.studyQueue = this.createInterleavedQueue(reviewCards.map(c => c.id));
+                this.state.currentIndex = 0;
 
                 this.dom.dashboard.style.display = 'none';
                 this.dom.studyScreen.style.display = 'flex';
-                this.renderCard(this.studyQueue[this.currentIndex]);
+                this.renderCard(this.state.studyQueue[0]);
             },
+            
+            createInterleavedQueue(cardIds) {
+                // トピックごとにカードをグループ化
+                const groupedByTopic = {};
+                cardIds.forEach(id => {
+                    const topic = this.state.cardData[id].topic.split('/')[0]; // 大分類でグループ化
+                    if (!groupedByTopic[topic]) {
+                        groupedByTopic[topic] = [];
+                    }
+                    groupedByTopic[topic].push(id);
+                });
 
-            evaluateCard(status) {
-                if (this.isTransitioning) return;
-                this.isTransitioning = true;
-                
-                const cardId = this.studyQueue[this.currentIndex];
-                const cardState = this.cardStates.find(s => s.id === cardId);
-                cardState.status = status;
+                // 各グループをシャッフル
+                for (const topic in groupedByTopic) {
+                    this.shuffleArray(groupedByTopic[topic]);
+                }
 
-                if (status === 'review') {
-                    this.sessionReviewQueue.push(cardId);
+                const interleavedQueue = [];
+                const topics = Object.keys(groupedByTopic);
+                let lastTopic = null;
+
+                while(interleavedQueue.length < cardIds.length) {
+                    // 前回と違うトピックを優先的に選択
+                    let availableTopics = topics.filter(t => groupedByTopic[t].length > 0 && t !== lastTopic);
+                    if (availableTopics.length === 0) {
+                        availableTopics = topics.filter(t => groupedByTopic[t].length > 0);
+                    }
+                    
+                    const nextTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+                    const nextCardId = groupedByTopic[nextTopic].shift();
+                    interleavedQueue.push(nextCardId);
+                    lastTopic = nextTopic;
                 }
                 
-                this.saveCardStates();
-                this.dom.evalFooter.classList.remove('show');
+                return interleavedQueue;
+            },
+
+            renderCard(cardId) {
+                this.state.currentCard = this.state.cardData.find(c => c.id === cardId);
+                const { topic, q } = this.state.currentCard;
+
+                this.dom.topicTag.textContent = topic;
+                this.dom.question.textContent = q;
+                
+                this.dom.progressInfo.textContent = `残り ${this.state.studyQueue.length - this.state.currentIndex} 問`;
+
+                // UIを初期状態に戻す
+                this.dom.recallSection.style.display = 'block';
+                this.dom.answerSection.style.display = 'none';
+                this.dom.recallInput.value = '';
+                this.dom.recallInput.focus();
+            },
+
+            checkAnswer() {
+                const userAnswer = this.dom.recallInput.value.trim();
+                if (!userAnswer) return;
+
+                const { a, simple_a } = this.state.currentCard;
+                
+                // 複数の正解キーワードに対応
+                const correctKeywords = simple_a.split(',').map(k => k.trim());
+                const isCorrect = correctKeywords.some(keyword => userAnswer.includes(keyword));
+                
+                // 回答表示エリアの準備
+                this.dom.answerContent.innerHTML = a;
+                this.dom.userAnswerText.textContent = userAnswer;
+                this.dom.answerBox.dataset.correct = isCorrect;
+                
+                // UI切り替え
+                this.dom.recallSection.style.display = 'none';
+                this.dom.answerSection.style.display = 'block';
+            },
+
+            evaluate(isConfident) {
+                const cardScore = this.state.cardScores.find(s => s.id === this.state.currentCard.id);
+                
+                if (isConfident) {
+                    cardScore.score = Math.min(100, cardScore.score + this.SCORE_INCREMENT);
+                } else {
+                    cardScore.score = Math.max(0, cardScore.score - this.SCORE_DECREMENT);
+                }
+                
+                this.saveScores();
                 this.proceedToNextCard();
             },
 
             proceedToNextCard() {
-                this.currentIndex++;
-                
-                if (this.currentCard) {
-                    this.currentCard.querySelector('.card-inner').style.opacity = '0';
-                }
-                
-                setTimeout(() => {
-                    this.isTransitioning = false;
-                    let nextCardId;
-                    if (this.currentIndex < this.studyQueue.length) {
-                        nextCardId = this.studyQueue[this.currentIndex];
-                    } else {
-                        // 1周目が終わったら、そのセッションで間違えた問題に移る
-                        this.studyQueue = this.shuffleArray(this.sessionReviewQueue);
-                        this.sessionReviewQueue = [];
-                        this.currentIndex = 0;
-                        nextCardId = this.studyQueue[this.currentIndex];
-                    }
-                    
-                    if (nextCardId !== undefined) {
-                        this.renderCard(nextCardId);
-                    } else {
-                        this.showCompletionMessage();
-                    }
-                }, 200);
-            },
-
-            showCompletionMessage() {
-                const remainingReview = this.cardStates.filter(s => s.status === 'review').length;
-                let message = '🎉 セッション完了！\n\n';
-                if (remainingReview > 0) {
-                    message += `まだ ${remainingReview} 問の苦手が残っています。\n「苦手だけを潰す」で完璧にしよう！`;
-                } else {
-                    message += '全問クリア！素晴らしい！自信を持ってテストに臨もう！';
-                }
-                alert(message);
-                this.showDashboard();
-            },
-
-            showDashboard() {
-                this.isTransitioning = false;
-                this.studyContextStack = [];
-                this.dom.dashboard.style.display = 'flex';
-                this.dom.studyScreen.style.display = 'none';
-                this.dom.evalFooter.classList.remove('show');
-                
-                const existingCard = this.dom.cardArea.querySelector('.card');
-                if (existingCard) {
-                    if (existingCard._eventCleanup) existingCard._eventCleanup();
-                    existingCard.remove();
-                }
-                this.currentCard = null;
-                this.updateDashboard();
-            },
-
-            renderCard(cardId, isJump = false) {
-                if (cardId === undefined) return;
-
-                const existingCard = this.dom.cardArea.querySelector('.card');
-                if (existingCard) {
-                    if (existingCard._eventCleanup) existingCard._eventCleanup();
-                    existingCard.remove();
-                }
-                
-                this.dom.evalFooter.classList.remove('show');
-                if (isJump) this.dom.backToQueueBtn.style.display = 'block';
-
-                const data = this.cardData[cardId];
-                
-                const cardElement = document.createElement('div');
-                cardElement.className = 'card';
-                cardElement.innerHTML = `
-                    <div class="card-inner">
-                        <div class="card-face card-front">
-                            <span class="topic-tag">${data.topic}</span>
-                            <div class="question">${data.q}</div>
-                        </div>
-                        <div class="card-face card-back">
-                            <div class="answer">${data.a}</div>
-                            <div class="related-cards-container">
-                                <h4>関連カード</h4>
-                                <div class="related-cards-list"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                this.dom.cardArea.appendChild(cardElement);
-                this.currentCard = cardElement;
-                
-                this.setupCardEvents(cardElement, cardId, isJump);
-                this.updateProgress();
-            },
-
-            setupCardEvents(card, cardId, isJump) {
-                const handleCardClick = (e) => {
-                    e.preventDefault();
-                    if (card.classList.contains('is-flipped')) return;
-                    card.classList.add('is-flipped');
-                    
+                this.state.currentIndex++;
+                if (this.state.currentIndex < this.state.studyQueue.length) {
+                    const nextCardId = this.state.studyQueue[this.state.currentIndex];
+                    // フェードアウト・インのような演出（簡易版）
+                    this.dom.studyScreen.querySelector('.card').style.opacity = 0;
                     setTimeout(() => {
-                        if (!isJump) this.dom.evalFooter.classList.add('show');
-                        this.renderRelatedCards(cardId);
-                    }, 250);
-                };
-
-                card.addEventListener('click', handleCardClick);
-                card._eventCleanup = () => card.removeEventListener('click', handleCardClick);
-            },
-
-            renderRelatedCards(cardId) {
-                const listContainer = this.currentCard.querySelector('.related-cards-list');
-                if (!listContainer) return;
-
-                const currentData = this.cardData[cardId];
-                const relatedIds = new Set(currentData.related || []);
-
-                if (relatedIds.size === 0) {
-                    listContainer.innerHTML = '関連カードはありません';
-                    return;
-                }
-
-                listContainer.innerHTML = '';
-                relatedIds.forEach(id => {
-                    const relatedData = this.cardData[id];
-                    if (relatedData) {
-                        const btn = document.createElement('button');
-                        btn.className = 'related-card-btn';
-                        btn.textContent = relatedData.q;
-                        btn.onclick = (e) => {
-                            e.stopPropagation();
-                            this.jumpToCard(id);
-                        };
-                        listContainer.appendChild(btn);
-                    }
-                });
-            },
-
-            jumpToCard(targetId) {
-                if (this.studyContextStack.length === 0) {
-                    this.studyContextStack.push({ 
-                        queue: this.studyQueue, 
-                        reviewQueue: this.sessionReviewQueue, 
-                        index: this.currentIndex 
-                    });
-                }
-                this.renderCard(targetId, true);
-            },
-
-            returnFromJump() {
-                const lastContext = this.studyContextStack.pop();
-                if (lastContext) {
-                    this.studyQueue = lastContext.queue;
-                    this.sessionReviewQueue = lastContext.reviewQueue;
-                    this.currentIndex = lastContext.index;
-                    this.dom.backToQueueBtn.style.display = 'none';
-                    this.renderCard(this.studyQueue[this.currentIndex], false);
+                        this.renderCard(nextCardId);
+                        this.dom.studyScreen.querySelector('.card').style.opacity = 1;
+                    }, 300);
+                } else {
+                    alert("🎉 学習セッション完了！");
+                    this.showDashboard();
                 }
             },
 
+            // --- ユーティリティ ---
             shuffleArray(array) {
-                let currentIndex = array.length, randomIndex;
-                while (currentIndex != 0) {
-                    randomIndex = Math.floor(Math.random() * currentIndex);
-                    currentIndex--;
-                    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
                 }
                 return array;
             }
