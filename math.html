@@ -3,365 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全問題対応 解法スキーマ・インストーラー</title>
+    <title>最後の魔法 - 思考インストール (全範囲対応)</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap');
+        
         :root {
-            --bg-color: #111827;
-            --text-color: #e5e7eb;
-            --primary-color: #38bdf8;
-            --secondary-color: #facc15;
-            --accent-color: #4ade80;
-            --card-bg: #1f2937;
-            --border-color: #374151;
+            --bg-dark: #10101a; --text-dark: #e0e0e0; --highlight-dark: #00f5a0; --accent-dark: #8e44ad; --card-bg-dark: #1a1a2e; --border-dark: #2a2a4e; --subtitle-dark: #aaa; --btn-bg-dark: rgba(0, 245, 160, 0.1); --btn-border-dark: rgba(0, 245, 160, 0.5);
+            --bg-light: #f4f7f9; --text-light: #1c1c1e; --highlight-light: #007aff; --accent-light: #5856d6; --card-bg-light: #ffffff; --border-light: #e1e4e8; --subtitle-light: #555; --btn-bg-light: rgba(0, 122, 255, 0.1); --btn-border-light: rgba(0, 122, 255, 0.5);
         }
+        
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.7;
-            padding: 1rem 2rem;
-        }
-        h1, h2 {
-            font-family: 'Roboto Mono', monospace;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2.2rem;
-            color: var(--primary-color);
-            text-shadow: 0 0 10px var(--primary-color);
-            margin-bottom: 0.5rem;
-        }
-        h2 {
-            font-size: 1.8rem;
-            color: var(--secondary-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 1rem;
-            margin-top: 3rem;
-            margin-bottom: 2rem;
-        }
-        .subtitle {
-            text-align: center;
-            font-size: 1.1rem;
-            color: #9ca3af;
-            margin-bottom: 2rem;
-        }
-        .problem-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            margin-bottom: 1rem;
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-        details {
-            padding: 1rem 1.5rem;
-            cursor: pointer;
-        }
-        summary {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-color);
-            list-style: none; /* markerを消す */
-        }
-        summary::-webkit-details-marker { display: none; }
-        summary::marker { display: none; }
-        
-        .installer-container {
-            display: none;
-            margin-top: 1rem;
-            border-top: 1px solid var(--border-color);
-            padding-top: 1rem;
-        }
-        details[open] .installer-container {
-            display: block;
-        }
-        
-        .step {
-            margin-bottom: 1.5rem;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 0.5s forwards;
-            border-left: 3px solid var(--secondary-color);
-            padding-left: 1rem;
-        }
-        .step-title {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1rem;
-            color: var(--secondary-color);
-            margin-bottom: 0.5rem;
-        }
-        .step-content { font-size: 1rem; }
-        
-        .keyword {
-            color: var(--accent-color);
-            font-weight: 700;
-        }
-        .tool {
-            background-color: var(--accent-color);
-            color: var(--bg-color);
-            padding: 0.2rem 0.5rem;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .final-step {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            padding: 0.8rem;
-            border: 2px dashed var(--primary-color);
-            border-radius: 8px;
-            margin-top: 1rem;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        body.dark-mode { background-color: var(--bg-dark); color: var(--text-dark); }
+        body.light-mode { background-color: var(--bg-light); color: var(--text-light); }
+
+        .container { padding: 1.5rem; max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        h1 { font-size: 2.5rem; font-weight: 900; margin: 0; }
+        h2 { font-size: 2rem; font-weight: 700; text-align: center; margin: 4rem 0 2rem 0; padding-bottom: 1rem; }
+        .subtitle { font-size: 1.1rem; }
+
+        body.dark-mode h1, body.dark-mode .highlight { color: var(--highlight-dark); }
+        body.light-mode h1, body.light-mode .highlight { color: var(--highlight-light); }
+        body.dark-mode h2 { color: var(--accent-dark); border-bottom: 3px solid var(--border-dark); }
+        body.light-mode h2 { color: var(--accent-light); border-bottom: 3px solid var(--border-light); }
+        body.dark-mode .subtitle { color: var(--subtitle-dark); }
+        body.light-mode .subtitle { color: var(--subtitle-light); }
+
+        details { border-radius: 15px; margin-bottom: 1.2rem; transition: all 0.3s ease; overflow: hidden; }
+        body.dark-mode details { background-color: var(--card-bg-dark); border: 1px solid var(--border-dark); }
+        body.light-mode details { background-color: var(--card-bg-light); border: 1px solid var(--border-light); }
+        body.dark-mode details:hover { border-color: var(--highlight-dark); box-shadow: 0 0 10px rgba(0, 245, 160, 0.2); }
+        body.light-mode details:hover { border-color: var(--highlight-light); box-shadow: 0 0 10px rgba(0, 122, 255, 0.2); }
+
+        summary { padding: 1.5rem; font-size: 1.3rem; font-weight: 700; cursor: pointer; list-style: none; }
+        summary::-webkit-details-marker { display: none; }
+
+        .content-box { padding: 0 1.5rem 1.5rem 1.5rem; border-top: 1px solid; display: none; }
+        details[open] .content-box { display: block; }
+        body.dark-mode .content-box { border-color: var(--border-dark); }
+        body.light-mode .content-box { border-color: var(--border-light); }
+
+        .step { margin-bottom: 1.5rem; animation: fadeIn 0.6s forwards; opacity: 0; transform: translateY(15px); }
+        .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        body.dark-mode .step-title { color: var(--subtitle-dark); }
+        body.light-mode .step-title { color: var(--subtitle-light); }
+        .step-body { font-size: 1.2rem; padding-left: 1rem; border-left: 3px solid; line-height: 1.9; }
+        body.dark-mode .step-body { border-color: var(--accent-dark); }
+        body.light-mode .step-body { border-color: var(--accent-light); }
+
+        .strategy-container, .install-container { display: none; }
+        .feedback { text-align: center; font-weight: bold; margin-top: 1rem; display: none; }
+        body.dark-mode .feedback { color: var(--highlight-dark); }
+        body.light-mode .feedback { color: var(--highlight-light); }
+        
+        button {
+            font-family: 'Noto Sans JP', sans-serif; font-size: 1.1rem; font-weight: 700; padding: 0.8rem 1.5rem; border-radius: 10px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s ease; margin-top: 1.5rem;
         }
-        .installer-container .step:nth-child(1) { animation-delay: 0.1s; }
-        .installer-container .step:nth-child(2) { animation-delay: 0.4s; }
-        .installer-container .step:nth-child(3) { animation-delay: 0.7s; }
-        .installer-container .step:nth-child(4) { animation-delay: 1.0s; }
+        body.dark-mode button { background: var(--btn-bg-dark); border: 2px solid var(--btn-border-dark); color: var(--highlight-dark); }
+        body.light-mode button { background: var(--btn-bg-light); border: 2px solid var(--btn-border-light); color: var(--highlight-light); }
+        body.dark-mode button:hover { background: var(--highlight-dark); color: var(--bg-dark); }
+        body.light-mode button:hover { background: var(--highlight-light); color: var(--bg-light); }
+        .icon { width: 1.2em; height: 1.2em; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body class="dark-mode">
+<div class="container">
+    <div class="header">
+        <h1>最後の魔法</h1>
+        <p class="subtitle">もう大丈夫。君の脳に、最強のナビをインストールする。</p>
+    </div>
 
-    <h1>全問題対応 解法スキーマ・インストーラー</h1>
-    <p class="subtitle">応用問題の「思考の型」を脳にインストールせよ。</p>
-
-    <!-- ======================= 第1章 多項式 ======================= -->
+    <!-- ======================= 第1章 ======================= -->
     <h2>CHAPTER 1: 多項式</h2>
-
-    <div class="problem-card">
-        <details>
-            <summary>問4 (P.28) 置き換えによる展開</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">式全体を俯瞰し、<span class="keyword">共通のパーツ</span> (例: $x^2+x$) を探す。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">共通パーツを <span class="tool">大文字A</span> などに置き換え、式を単純化する。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
-                    <div class="step-content">単純化した式を展開し、最後に <span class="tool">A</span> を元の式に戻す。</div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「複雑な展開」→「共通部分を探して置き換え」</div>
-                </div>
-            </div>
-        </details>
-    </div>
-
-    <div class="problem-card">
-        <details>
-            <summary>問6 (P.31) 複雑な因数分解</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: PATTERN RECOGNITION</div>
-                    <div class="step-content">(1) <span class="keyword">共通の塊 (x+y)</span> → 置き換え
-                    <br>(2) <span class="keyword">複数の文字</span> → <span class="tool">次数が最も低い文字</span>で整理
-                    <br>(3) <span class="keyword">x⁴-1</span> → <span class="tool">二乗の差</span> $(x^2)^2 - 1^2$
-                    <br>(4) <span class="keyword">8x³+27</span> → <span class="tool">三乗の和</span> $(2x)^3 + 3^3$
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「因数分解」→ まずは共通因数。ダメなら公式・置き換え・最低次数の文字で整理。</div>
-                </div>
-            </div>
-        </details>
-    </div>
-
-    <div class="problem-card">
-        <details>
-            <summary>問3 (P.37) 割り算と係数決定</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">「...で割ると余りが...となるようにa,bを定めよ」がシグナル。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">2つのルートがある。
-                    <br><strong>ルートA (確実):</strong> <span class="keyword">実際に筆算</span>で割り、出てきた余りの式と問題の余りの式で <span class="tool">係数比較</span>。
-                    <br><strong>ルートB (スマート):</strong> <span class="keyword">恒等式 A=BQ+R</span> を立て、Q(x)をax+cなどと仮定して展開し、<span class="tool">係数比較</span>。
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「余りが指定された係数決定」→ 筆算でゴリ押すのが安全。</div>
-                </div>
-            </div>
-        </details>
-    </div>
-
-    <div class="problem-card">
-        <details>
-            <summary>問2 (P.39) 剰余の定理（連立方程式）</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">未知数が <span class="keyword">a, b の2つ</span>。条件も <span class="keyword">2つ</span> (x-1で割り切れる, x+2で割ると余り-10)。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">未知数2つ、条件2つ → <span class="tool">連立方程式</span> を作る。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
-                    <div class="step-content">
-                    1. 「x-1で割り切れる」→ <span class="keyword">P(1) = 0</span>
-                    <br>2. 「x+2で割ると余り-10」→ <span class="keyword">P(-2) = -10</span>
-                    <br>3. 上記2つの式を立て、aとbの連立方程式として解く。
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「未知数2つ、条件2つ」→ 剰余の定理で連立方程式。</div>
-                </div>
-            </div>
-        </details>
-    </div>
+    <details>
+        <summary>問4 (P.28) 置き換えによる展開</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">一見、面倒くさそうだけど、これは「<span class="highlight">間違い探し</span>」ゲームだ。式の中に隠れている<span class="highlight">同じ顔のパーツ</span>を見つけるだけ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「同じ顔のパーツを、<span class="highlight">ヒーロー『A』</span>と呼ぼう！」<br>すると、ゴチャゴチャした式が、超シンプルな式に変身する。<br>変身した式を解いて、最後にヒーロー『A』を元の姿に戻してやれば、クリアだ。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問6 (P.31) 複雑な因数分解</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">ゴチャゴチャして見えるのは、宝物が隠されてる証拠だ。<span class="highlight">ただのパズル</span>だと思え。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「この中で<span class="highlight">一番弱いヤツ（一番次数の低い文字）</span>は誰だ？そいつをリーダーにして整列させろ！」<br>そうすれば、隠れていた<span class="highlight">同じ顔のグループ</span>が姿を現す。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問3 (P.37) 割り算と係数決定</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">「aとbを決めろ」って言われても、慌てるな。これは「<span class="highlight">答えはもう分かってる</span>」っていうヒントだ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「とりあえず、<span class="highlight">言われた通りに割り算（筆算）してみよう</span>」<br>計算の最後に出てきた「余り」と、問題文に書いてある「余り」を<span class="highlight">見比べるだけ</span>。<br>「xの前の数字」と「ただの数字」が同じになるように、aとbを決めてあげればいい。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問4 (P.40) 因数定理（応用）</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">3次式の因数分解は、<span class="highlight">宝の鍵を1つ見つける</span>ゲームだ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「この式を<span class="highlight">0にするx</span>はなんだ？」<br>xに1, -1, 2, -2...と簡単な数字を代入して試すんだ。<br>もしx=1で0になったら、宝の鍵は<span class="highlight">(x-1)</span>だ。鍵が見つかったら、あとは元の式をその鍵で<span class="highlight">割り算</span>するだけ。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
     
-    <!-- ======================= 第2章 図形と方程式 ======================= -->
+    <!-- ======================= 第2章 ======================= -->
     <h2>CHAPTER 2: 図形と方程式</h2>
-    
-    <div class="problem-card">
-        <details>
-            <summary>問3, 5 (P.48) 等距離にある点</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">「<span class="keyword">等距離にある点P</span>」がシグナル。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">
-                    1. 点Pの座標を文字で置く。(y軸上なら<span class="tool">(0, p)</span>, 直線y=x+1上なら<span class="tool">(p, p+1)</span>)
-                    <br>2. 「距離が等しい」を立式する。 <span class="tool">AP = BP</span>
-                    <br>3. ルートが邪魔なので、<span class="tool">両辺を2乗 (AP² = BP²)</span> して計算する。
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「等距離」→ 点Pを文字で置く → AP² = BP² の方程式を解く。</div>
-                </div>
-            </div>
-        </details>
-    </div>
+    <details>
+        <summary>問4 (P.48) 三角形の形状決定</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">「どんな三角形？」なんて聞かれても、ビビるな。答えは<span class="highlight">「辺の長さ」</span>が全部知っている。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「面倒くさい？いや、これはただの作業だ。」<br>３つの辺の長さを、距離の公式で<span class="highlight">全部計算するんだ。</span><br>あとは、計算結果の数字たちを眺めて、「同じ長さはあるか？」「ピタゴラスのあの呪文（a²+b²=c²）は使えるか？」って確かめるだけ。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問10 (P.51) 平行四辺形の頂点</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">「平行四辺形」って言葉は、<span class="highlight">魔法の呪文</span>だ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「<span class="highlight">対角線の真ん中と、もう一本の対角線の真ん中は、同じ場所！</span>」<br>この呪文を唱えれば、答えへの道が開かれる。それぞれの真ん中の点を計算して、<span class="highlight">イコールで結ぶ</span>だけ。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問3 (P.55) 垂直二等分線</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">「垂直二等分線」は、<span class="highlight">２つのミッション</span>をクリアするヒーローを探す物語だ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">ミッション１：「<span class="highlight">二等分</span>」→ 線の<span class="highlight">ど真ん中（中点）</span>を通る。これでヒーローが通る場所が１つわかる。<br>ミッション２：「<span class="highlight">垂直</span>」→ 元の線の<span class="highlight">傾きをひっくり返してマイナス</span>をつける。これでヒーローの進む向き（傾き）がわかる。<br>場所と向きがわかれば、もう無敵だ。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問8 (P.58) 2直線の交点を通る直線</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">ゴールは「直線の方程式」を作ること。そのためには<span class="highlight">「通る点が２つ」</span>あればいい。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">１つ目の点は、問題文が親切に教えてくれてる。<br>２つ目の点は？ → <span class="highlight">「２直線の交点」</span>だ。<br>２つの直線の式を<span class="highlight">連立方程式で解けば</span>、交点（２つ目の点）が手に入る。<br>あとは、２つの点を使って直線の方程式を作るだけ。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問2 (P.64) 直径の両端から円の方程式</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">円の方程式を作るには、「<span class="highlight">中心</span>」と「<span class="highlight">半径</span>」が分かればいい。この問題は、それを遠回しに教えてくれてるだけ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">円の「中心」はどこ？ → 直径の<span class="highlight">ど真ん中（中点）</span>だ。<br>円の「半径」は？ → 中点から端っこまでの<span class="highlight">距離</span>だ。<br>中心と半径がわかれば、円の方程式はもう作ったも同然。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
+    <details>
+        <summary>問6 (P.67) 円と直線の共有点</summary>
+        <div class="content-box">
+            <div class="step"><div class="step-title">この問題、見た目にだまされるな。</div><div class="step-body">「共有点の座標」と聞かれたら、それは「<span class="highlight">連立方程式を解け</span>」というただの命令だ。</div></div>
+            <button class="show-strategy-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>どう解く？</button>
+            <div class="strategy-container"><div class="step"><div class="step-title">君の脳は、こう囁くはずだ。</div><div class="step-body">「合体させろ！」<br>直線の方程式（y = ...）を、円の方程式の<span class="highlight">yに代入するんだ。</span><br>すると、xだけの2次方程式になる。それを解けばxがわかる。xがわかれば、yもわかる。</div></div>
+                <div class="install-container"><button class="install-btn">この思考回路をインストール</button><p class="feedback">インストール完了！</p></div></div>
+        </div>
+    </details>
 
-    <div class="problem-card">
-        <details>
-            <summary>問4 (P.48) 三角形の形状決定</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">「<span class="keyword">どのような三角形か</span>」がシグナル。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">三角形の形状は <span class="tool">辺の長さ</span> で決まる。３辺の長さを全部計算する。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
-                    <div class="step-content">
-                    1. 辺AB, BC, CAの長さを <span class="keyword">2点間の距離の公式</span> で計算する。
-                    <br>2. 辺の長さを比較する。
-                    <br> ・2辺が等しい → <span class="tool">二等辺三角形</span>
-                    <br> ・3辺が等しい → <span class="tool">正三角形</span>
-                    <br> ・a²+b²=c² が成り立つ → <span class="tool">直角三角形</span>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「三角形の形」→ 3辺の長さを計算して関係を調べる。</div>
-                </div>
-            </div>
-        </details>
-    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const detailsElements = document.querySelectorAll('details');
+        detailsElements.forEach(details => {
+            const contentBox = details.querySelector('.content-box');
+            const strategyBtn = details.querySelector('.show-strategy-btn');
+            const strategyContainer = details.querySelector('.strategy-container');
+            const installContainer = details.querySelector('.install-container');
+            const installBtn = details.querySelector('.install-btn');
+            const feedback = details.querySelector('.feedback');
+            
+            details.addEventListener('toggle', (event) => {
+                if (details.open) {
+                    // Reset animation
+                    const steps = contentBox.querySelectorAll('.step');
+                    steps.forEach(step => {
+                        step.style.animation = 'none';
+                        step.offsetHeight; /* trigger reflow */
+                        step.style.animation = null; 
+                    });
+                } else {
+                    strategyContainer.style.display = 'none';
+                    strategyBtn.style.display = 'block';
+                    installContainer.style.display = 'none';
+                    feedback.style.display = 'none';
+                    installBtn.style.display = 'block';
+                }
+            });
 
-    <div class="problem-card">
-        <details>
-            <summary>問10 (P.51) 平行四辺形の頂点</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">「<span class="keyword">平行四辺形ABCD</span>」がシグナル。頂点の順番が重要。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">平行四辺形の性質 <span class="tool">「対角線の中点が一致する」</span> を利用する。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
-                    <div class="step-content">
-                    1. 求める点Dの座標を <span class="keyword">(x, y)</span> と置く。
-                    <br>2. 対角線 <span class="tool">ACの中点</span> の座標を計算する。
-                    <br>3. もう一方の対角線 <span class="tool">BDの中点</span> の座標を(x,yを使って)計算する。
-                    <br>4. (2)と(3)のx座標どうし、y座標どうしが等しいとして、xとyの方程式を解く。
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「平行四辺形」→ 対角線の中点の一致。</div>
-                </div>
-            </div>
-        </details>
-    </div>
+            strategyBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                strategyContainer.style.display = 'block';
+                installContainer.style.display = 'block';
+                strategyBtn.style.display = 'none';
+            });
 
-    <div class="problem-card">
-        <details>
-            <summary>問8 (P.58) 2直線の交点を通る直線</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">「<span class="keyword">2直線の交点</span>」と「<span class="keyword">もう1つの点</span>」を通る直線がシグナル。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">直線の方程式を決めるには <span class="tool">通る2点</span> が分かればよい。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
-                    <div class="step-content">
-                    1. 2直線の式を <span class="keyword">連立方程式</span> として解き、<span class="tool">交点の座標</span>を求める。
-                    <br>2. これで通る2点が「(1)で求めた交点」と「問題文で与えられた点」に確定した。
-                    <br>3. <span class="tool">2点を通る直線の方程式</span>の公式を使って答えを出す。
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「交点を通る直線」→ まず連立方程式で交点を求める。</div>
-                </div>
-            </div>
-        </details>
-    </div>
-
-    <div class="problem-card">
-        <details>
-            <summary>問6 (P.67) 円と直線の共有点の座標</summary>
-            <div class="installer-container">
-                <div class="step">
-                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
-                    <div class="step-content">「<span class="keyword">共有点の座標</span>」がシグナル。「個数」ではなく「座標」を求められている点に注意。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
-                    <div class="step-content">図形的には円と直線の交点だが、代数的には <span class="tool">連立方程式の解</span> である。</div>
-                </div>
-                <div class="step">
-                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
-                    <div class="step-content">
-                    1. 直線の方程式 (y=...) を円の方程式の <span class="keyword">yに代入</span>する。
-                    <br>2. すると、<span class="tool">xだけの2次方程式</span> が出来上がる。
-                    <br>3. この2次方程式を解いて、xの値を求める。(xが1つなら接点、2つなら交点)
-                    <br>4. 求めたxの値を、元の直線の方程式 <span class="keyword">y=x+1</span> に代入して、対応するyの値を求める。
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="final-step">「共有点の座標」→ 代入して連立方程式を解く。</div>
-                </div>
-            </div>
-        </details>
-    </div>
-
+            installBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                feedback.style.display = 'block';
+                installBtn.style.display = 'none';
+            });
+        });
+    });
+</script>
 </body>
 </html>
