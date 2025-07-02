@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全問題対応 解法スキーマ・インストーラー</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+        :root {
+            --bg-color: #111827;
+            --text-color: #e5e7eb;
+            --primary-color: #38bdf8;
+            --secondary-color: #facc15;
+            --accent-color: #4ade80;
+            --card-bg: #1f2937;
+            --border-color: #374151;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            padding: 1rem 2rem;
+        }
+        h1, h2 {
+            font-family: 'Roboto Mono', monospace;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.8rem;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1rem;
+            margin-top: 3rem;
+            margin-bottom: 2rem;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+        .problem-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+        details {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+        }
+        summary {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-color);
+            list-style: none; /* markerを消す */
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::marker { display: none; }
+        
+        .installer-container {
+            display: none;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+        details[open] .installer-container {
+            display: block;
+        }
+        
+        .step {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+            border-left: 3px solid var(--secondary-color);
+            padding-left: 1rem;
+        }
+        .step-title {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        .step-content { font-size: 1rem; }
+        
+        .keyword {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+        .tool {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .final-step {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            padding: 0.8rem;
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .installer-container .step:nth-child(1) { animation-delay: 0.1s; }
+        .installer-container .step:nth-child(2) { animation-delay: 0.4s; }
+        .installer-container .step:nth-child(3) { animation-delay: 0.7s; }
+        .installer-container .step:nth-child(4) { animation-delay: 1.0s; }
+    </style>
+</head>
+<body>
+
+    <h1>全問題対応 解法スキーマ・インストーラー</h1>
+    <p class="subtitle">応用問題の「思考の型」を脳にインストールせよ。</p>
+
+    <!-- ======================= 第1章 多項式 ======================= -->
+    <h2>CHAPTER 1: 多項式</h2>
+
+    <div class="problem-card">
+        <details>
+            <summary>問4 (P.28) 置き換えによる展開</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">式全体を俯瞰し、<span class="keyword">共通のパーツ</span> (例: $x^2+x$) を探す。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">共通パーツを <span class="tool">大文字A</span> などに置き換え、式を単純化する。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
+                    <div class="step-content">単純化した式を展開し、最後に <span class="tool">A</span> を元の式に戻す。</div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「複雑な展開」→「共通部分を探して置き換え」</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問6 (P.31) 複雑な因数分解</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: PATTERN RECOGNITION</div>
+                    <div class="step-content">(1) <span class="keyword">共通の塊 (x+y)</span> → 置き換え
+                    <br>(2) <span class="keyword">複数の文字</span> → <span class="tool">次数が最も低い文字</span>で整理
+                    <br>(3) <span class="keyword">x⁴-1</span> → <span class="tool">二乗の差</span> $(x^2)^2 - 1^2$
+                    <br>(4) <span class="keyword">8x³+27</span> → <span class="tool">三乗の和</span> $(2x)^3 + 3^3$
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「因数分解」→ まずは共通因数。ダメなら公式・置き換え・最低次数の文字で整理。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問3 (P.37) 割り算と係数決定</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">「...で割ると余りが...となるようにa,bを定めよ」がシグナル。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">2つのルートがある。
+                    <br><strong>ルートA (確実):</strong> <span class="keyword">実際に筆算</span>で割り、出てきた余りの式と問題の余りの式で <span class="tool">係数比較</span>。
+                    <br><strong>ルートB (スマート):</strong> <span class="keyword">恒等式 A=BQ+R</span> を立て、Q(x)をax+cなどと仮定して展開し、<span class="tool">係数比較</span>。
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「余りが指定された係数決定」→ 筆算でゴリ押すのが安全。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問2 (P.39) 剰余の定理（連立方程式）</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">未知数が <span class="keyword">a, b の2つ</span>。条件も <span class="keyword">2つ</span> (x-1で割り切れる, x+2で割ると余り-10)。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">未知数2つ、条件2つ → <span class="tool">連立方程式</span> を作る。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
+                    <div class="step-content">
+                    1. 「x-1で割り切れる」→ <span class="keyword">P(1) = 0</span>
+                    <br>2. 「x+2で割ると余り-10」→ <span class="keyword">P(-2) = -10</span>
+                    <br>3. 上記2つの式を立て、aとbの連立方程式として解く。
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「未知数2つ、条件2つ」→ 剰余の定理で連立方程式。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+    
+    <!-- ======================= 第2章 図形と方程式 ======================= -->
+    <h2>CHAPTER 2: 図形と方程式</h2>
+    
+    <div class="problem-card">
+        <details>
+            <summary>問3, 5 (P.48) 等距離にある点</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">「<span class="keyword">等距離にある点P</span>」がシグナル。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">
+                    1. 点Pの座標を文字で置く。(y軸上なら<span class="tool">(0, p)</span>, 直線y=x+1上なら<span class="tool">(p, p+1)</span>)
+                    <br>2. 「距離が等しい」を立式する。 <span class="tool">AP = BP</span>
+                    <br>3. ルートが邪魔なので、<span class="tool">両辺を2乗 (AP² = BP²)</span> して計算する。
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「等距離」→ 点Pを文字で置く → AP² = BP² の方程式を解く。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問4 (P.48) 三角形の形状決定</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">「<span class="keyword">どのような三角形か</span>」がシグナル。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">三角形の形状は <span class="tool">辺の長さ</span> で決まる。３辺の長さを全部計算する。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
+                    <div class="step-content">
+                    1. 辺AB, BC, CAの長さを <span class="keyword">2点間の距離の公式</span> で計算する。
+                    <br>2. 辺の長さを比較する。
+                    <br> ・2辺が等しい → <span class="tool">二等辺三角形</span>
+                    <br> ・3辺が等しい → <span class="tool">正三角形</span>
+                    <br> ・a²+b²=c² が成り立つ → <span class="tool">直角三角形</span>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「三角形の形」→ 3辺の長さを計算して関係を調べる。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問10 (P.51) 平行四辺形の頂点</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">「<span class="keyword">平行四辺形ABCD</span>」がシグナル。頂点の順番が重要。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">平行四辺形の性質 <span class="tool">「対角線の中点が一致する」</span> を利用する。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
+                    <div class="step-content">
+                    1. 求める点Dの座標を <span class="keyword">(x, y)</span> と置く。
+                    <br>2. 対角線 <span class="tool">ACの中点</span> の座標を計算する。
+                    <br>3. もう一方の対角線 <span class="tool">BDの中点</span> の座標を(x,yを使って)計算する。
+                    <br>4. (2)と(3)のx座標どうし、y座標どうしが等しいとして、xとyの方程式を解く。
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「平行四辺形」→ 対角線の中点の一致。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問8 (P.58) 2直線の交点を通る直線</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">「<span class="keyword">2直線の交点</span>」と「<span class="keyword">もう1つの点</span>」を通る直線がシグナル。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">直線の方程式を決めるには <span class="tool">通る2点</span> が分かればよい。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
+                    <div class="step-content">
+                    1. 2直線の式を <span class="keyword">連立方程式</span> として解き、<span class="tool">交点の座標</span>を求める。
+                    <br>2. これで通る2点が「(1)で求めた交点」と「問題文で与えられた点」に確定した。
+                    <br>3. <span class="tool">2点を通る直線の方程式</span>の公式を使って答えを出す。
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「交点を通る直線」→ まず連立方程式で交点を求める。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <div class="problem-card">
+        <details>
+            <summary>問6 (P.67) 円と直線の共有点の座標</summary>
+            <div class="installer-container">
+                <div class="step">
+                    <div class="step-title">// STEP 1: KEYWORD SCAN</div>
+                    <div class="step-content">「<span class="keyword">共有点の座標</span>」がシグナル。「個数」ではなく「座標」を求められている点に注意。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 2: STRATEGY DESIGN</div>
+                    <div class="step-content">図形的には円と直線の交点だが、代数的には <span class="tool">連立方程式の解</span> である。</div>
+                </div>
+                <div class="step">
+                    <div class="step-title">// STEP 3: EXECUTION PLAN</div>
+                    <div class="step-content">
+                    1. 直線の方程式 (y=...) を円の方程式の <span class="keyword">yに代入</span>する。
+                    <br>2. すると、<span class="tool">xだけの2次方程式</span> が出来上がる。
+                    <br>3. この2次方程式を解いて、xの値を求める。(xが1つなら接点、2つなら交点)
+                    <br>4. 求めたxの値を、元の直線の方程式 <span class="keyword">y=x+1</span> に代入して、対応するyの値を求める。
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="final-step">「共有点の座標」→ 代入して連立方程式を解く。</div>
+                </div>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
