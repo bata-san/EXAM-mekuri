@@ -162,8 +162,6 @@
         }
         #back-to-dash:hover { background: rgba(0,0,0,0.8); }
         
-        /* スワイプインジケーターのスタイルを削除 */
-        
         strong { color: #d63384; }
     </style>
 </head>
@@ -201,7 +199,6 @@
                 <div class="progress-info" id="progress-info"></div>
             </div>
             <div class="card-area" id="card-area">
-                <!-- スワイプインジケーターのHTML要素を削除 -->
             </div>
             <div id="back-to-dash" title="ダッシュボードに戻る">✕</div>
             
@@ -303,7 +300,7 @@
         let currentIndex = 0;
         let cardStates = [];
         let currentCard = null;
-        let isTransitioning = false; // カード遷移中のフラグ
+        let isTransitioning = false;
 
         // DOM要素の取得
         const dashboard = document.getElementById('dashboard');
@@ -312,13 +309,18 @@
         const evalFooter = document.getElementById('eval-footer');
         const progressInfo = document.getElementById('progress-info');
 
-        // デバウンス関数
-        const debounce = (func, delay) => {
-            let timeoutId;
-            return (...args) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => func.apply(null, args), delay);
-            };
+        // === ユーティリティ関数 ===
+        /**
+         * 配列をランダムにシャッフルする (Fisher-Yates algorithm)
+         * @param {Array} array シャッフルしたい配列
+         * @returns {Array} シャッフル後の配列
+         */
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         };
 
         // === 状態管理 ===
@@ -360,25 +362,39 @@
         };
 
         const updateProgress = () => {
-            progressInfo.textContent = `${currentIndex + 1} / ${studyQueue.length}`;
+            if (studyQueue.length > 0) {
+                progressInfo.textContent = `${currentIndex + 1} / ${studyQueue.length}`;
+            } else {
+                progressInfo.textContent = '0 / 0';
+            }
         };
 
-        // === 学習開始 ===
+        // === 学習開始 (アルゴリズム改善) ===
         const startStudy = (filterType) => {
-            // 学習対象カードを選択
             if (filterType === 'all') {
-                studyQueue = cardStates.filter(s => s.status !== 'mastered').map(s => s.id);
+                // 「苦手」と「未学習」のカードを取得
+                const reviewItems = cardStates.filter(s => s.status === 'review').map(s => s.id);
+                const unseenItems = cardStates.filter(s => s.status === 'unseen').map(s => s.id);
+                
+                // それぞれのリストをシャッフル
+                shuffleArray(reviewItems);
+                shuffleArray(unseenItems);
+                
+                // 「苦手」を先に、「未学習」を後に連結して学習キューを作成
+                studyQueue = [...reviewItems, ...unseenItems];
             } else { // review
+                // 「苦手」カードのみを取得してシャッフル
                 studyQueue = cardStates.filter(s => s.status === 'review').map(s => s.id);
+                shuffleArray(studyQueue);
             }
             
-            // 学習対象がない場合
+            // 学習対象がない場合の処理
             if (studyQueue.length === 0) {
                 const message = filterType === 'review' ? 
                     '「苦手」のカードはありません！\n全範囲で学習を開始しますか？' : 
-                    '学習対象のカードがありません。';
+                    'おめでとうございます！学習対象のカードは全て完璧です。';
                 
-                if (filterType === 'review') {
+                if (filterType === 'review' && cardStates.some(s => s.status === 'unseen')) {
                     if (confirm(message)) {
                         startStudy('all');
                     }
@@ -397,29 +413,23 @@
 
         // === カード表示 ===
         const renderCurrentCard = () => {
-            // 学習完了チェック
             if (currentIndex >= studyQueue.length) {
                 showCompletionMessage();
                 return;
             }
 
-            // 既存のカードを適切にクリア
             const existingCard = cardArea.querySelector('.card');
             if (existingCard) {
-                if (existingCard._eventCleanup) {
-                    existingCard._eventCleanup();
-                }
+                if (existingCard._eventCleanup) existingCard._eventCleanup();
                 existingCard.remove();
             }
             
-            // 評価ボタンを非表示
             evalFooter.classList.remove('show');
 
             const cardId = studyQueue[currentIndex];
             const state = cardStates[cardId];
             const data = cardData[cardId];
             
-            // 新しいカードを作成
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
             cardElement.innerHTML = `
@@ -437,50 +447,40 @@
             cardArea.appendChild(cardElement);
             currentCard = cardElement;
             
-            // 短いディレイ後にイベントリスナーを設定（DOM安定化のため）
             setTimeout(() => {
                 setupCardEvents(cardElement, cardId);
             }, 50);
             
-            // プログレスを更新
             updateProgress();
         };
 
-        // === カードイベント設定 (スワイプ機能を除去し、クリックのみに修正) ===
+        // === カードイベント設定 ===
         const setupCardEvents = (card, cardId) => {
             let isFlipped = false;
-            let isProcessing = false; // アニメーション中のフラグ
+            let isProcessing = false;
 
-            // カードクリック（タップ）で回転
             const handleCardClick = (e) => {
                 e.preventDefault();
-                
                 if (isFlipped || isProcessing) return;
                 
                 isProcessing = true;
                 card.classList.add('is-flipped');
                 isFlipped = true;
                 
-                // フリップアニメーションの途中で裏面の内容を追加
                 setTimeout(() => {
                     const answerDiv = card.querySelector('.card-back .answer');
                     if (answerDiv && !answerDiv.innerHTML) {
-                        const data = cardData[cardId];
-                        answerDiv.innerHTML = data.a;
+                        answerDiv.innerHTML = cardData[cardId].a;
                     }
                 }, 150);
                 
-                // 評価ボタンを表示
                 setTimeout(() => {
                     evalFooter.classList.add('show');
                     isProcessing = false;
                 }, 300);
             };
 
-            // クリックイベントのみを追加
             card.addEventListener('click', handleCardClick);
-
-            // カードが削除される時のクリーンアップ用
             card._eventCleanup = () => {
                 card.removeEventListener('click', handleCardClick);
             };
@@ -496,7 +496,6 @@
             saveCardStates();
             
             evalFooter.classList.remove('show');
-            
             proceedToNextCard();
         };
 
@@ -539,7 +538,6 @@
         // === ダッシュボード表示 ===
         const showDashboard = () => {
             isTransitioning = false;
-            
             dashboard.style.display = 'flex';
             studyScreen.style.display = 'none';
             evalFooter.classList.remove('show');
@@ -547,12 +545,9 @@
             
             const existingCard = cardArea.querySelector('.card');
             if (existingCard) {
-                if (existingCard._eventCleanup) {
-                    existingCard._eventCleanup();
-                }
+                if (existingCard._eventCleanup) existingCard._eventCleanup();
                 existingCard.remove();
             }
-            
             currentCard = null;
         };
 
