@@ -74,7 +74,7 @@
         
         /* Card Styles */
         .card { 
-            width: 100%; max-width: 400px; height: 400px; /* 高さを増やす */
+            width: 100%; max-width: 400px; height: 420px; /* 高さを増やす */
             perspective: 1000px; cursor: pointer; user-select: none;
         }
         .card-inner { 
@@ -145,6 +145,7 @@
             cursor: pointer;
             transition: background-color 0.2s;
             width: 100%;
+            box-sizing: border-box;
         }
         .related-card-btn:hover {
             background-color: #e9ecef;
@@ -194,7 +195,28 @@
     <div class="app-container">
         <!-- Dashboard Screen -->
         <div id="dashboard">
-            <!-- (変更なし) -->
+            <h1>地理 最終決戦</h1>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="label">全問題数</div>
+                    <div class="value" id="total-value">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">未学習</div>
+                    <div class="value" id="unseen-value">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">苦手</div>
+                    <div class="value" id="review-value">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">完璧</div>
+                    <div class="value" id="mastered-value">0</div>
+                </div>
+            </div>
+            <button class="start-btn" id="start-all-btn">1周目スタート (全範囲)</button>
+            <button class="start-btn" id="start-review-btn" style="background-color: #dc3545;">苦手だけを潰す</button>
+            <button class="start-btn" id="reset-progress" style="margin-top:20px; background-color: #6c757d; font-size: 14px;">学習記録をリセット</button>
         </div>
 
         <!-- Study Screen -->
@@ -215,11 +237,11 @@
 
     <script>
     // === データ定義 (関連カードIDを追加) ===
-    let cardData = [ 
-        { topic: "地形", q: "氷河の侵食でできたU字谷に海水が侵入してできた海岸地形は？", a: "<strong>フィヨルド</strong>" },
+    const initialCardData = [ 
+        { topic: "地形", q: "氷河の侵食でできたU字谷に海水が侵入してできた海岸地形は？", a: "<strong>フィヨルド</strong>", related: [1, 2] },
         { topic: "地形", q: "氷河が山頂付近を削ってできた、お椀型の谷を何というか？", a: "<strong>カール（圏谷）</strong>", related: [0, 2] },
-        { topic: "地形", q: "氷河が運んだ土砂が堆積してできた丘を何と呼ぶか？", a: "<strong>モレーン</strong>", related: [1] },
-        { topic: "地形", q: "河川が山地から平野に出る所にできる、扇状の地形は？", a: "<strong>扇状地</strong>", related: [4, 5] },
+        { topic: "地形", q: "氷河が運んだ土砂が堆積してできた丘を何と呼ぶか？", a: "<strong>モレーン</strong>", related: [0, 1] },
+        { topic: "地形", q: "河川が山地から平野に出る所にできる、扇状の地形は？", a: "<strong>扇状地</strong>", related: [4, 5, 6] },
         { topic: "地形", q: "扇状地の中央部（扇央）でよく見られる、普段は水が流れない川は？", a: "<strong>水無川</strong>", related: [3, 5] },
         { topic: "地形", q: "扇状地の末端（扇端）では、何が湧き出すため集落が発達しやすいか？", a: "<strong>湧水</strong>", related: [3, 4] },
         { topic: "地形", q: "河川が蛇行する下流部に形成される平野を何と呼ぶか？", a: "<strong>氾濫原</strong>", related: [7, 8, 9] },
@@ -229,21 +251,20 @@
         { topic: "地形", q: "河口付近に運ばれた土砂が堆積してできる三角形の地形は？", a: "<strong>三角州（デルタ）</strong>" },
         { topic: "地形", q: "硬い水平な地層が侵食から残ってできたテーブル状の地形は？", a: "<strong>メサ</strong>", related: [12] },
         { topic: "地形", q: "メサがさらに侵食されてできた、孤立した岩山は？", a: "<strong>ビュート</strong>", related: [11] },
-        // ... (以下、他のカードにも同様に関連を設定可能)
-        { topic: "地形", q: "石灰岩が水に溶食されてできる地形を総称して何というか？", a: "<strong>カルスト地形</strong>", related: [17, 18, 19] },
-        { topic: "地形", q: "カルスト地形で見られる、すり鉢状のくぼ地は？", a: "<strong>ドリーネ</strong>", related: [16, 18] },
-        { topic: "地形", q: "ドリーネが複数つながってできた、より大きなくぼ地は？", a: "<strong>ウバーレ</strong>", related: [16, 17] },
-        { topic: "地形", q: "カルスト地形の地下に見られる、石灰岩が溶けてできた洞窟は？", a: "<strong>鍾乳洞</strong>", related: [16] },
-        // ...
-        { topic: "生活・植生・土壌", q: "地中海沿岸の石灰岩が風化してできた赤色の土壌は？", a: "<strong>テラロッサ</strong>", related: [70] },
-        { topic: "生活・植生・土壌", q: "地中海性気候(Cs)の代表的な農業と、その作物2つは？", a: "<strong>地中海式農業</strong> (<strong>オリーブ</strong>, <strong>ブドウ</strong>など)", related: [69] },
+        { topic: "地形", q: "石灰岩が水に溶食されてできる地形を総称して何というか？", a: "<strong>カルスト地形</strong>", related: [14, 15, 16] },
+        { topic: "地形", q: "カルスト地形で見られる、すり鉢状のくぼ地は？", a: "<strong>ドリーネ</strong>", related: [13, 15] },
+        { topic: "地形", q: "ドリーネが複数つながってできた、より大きなくぼ地は？", a: "<strong>ウバーレ</strong>", related: [13, 14] },
+        { topic: "地形", q: "カルスト地形の地下に見られる、石灰岩が溶けてできた洞窟は？", a: "<strong>鍾乳洞</strong>", related: [13] },
+        { topic: "生活・植生・土壌", q: "地中海沿岸の石灰岩が風化してできた赤色の土壌は？", a: "<strong>テラロッサ</strong>", related: [13, 18] },
+        { topic: "生活・植生・土壌", q: "地中海性気候(Cs)の代表的な農業と、その作物2つは？", a: "<strong>地中海式農業</strong> (<strong>オリーブ</strong>, <strong>ブドウ</strong>など)", related: [17] },
+        // ... 他のカードデータ
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-        // IDを自動付与
-        const processedCardData = cardData.map((card, index) => ({ ...card, id: index }));
+        // IDを自動付与し、グローバルで利用する
+        const cardData = initialCardData.map((card, index) => ({ ...card, id: index }));
 
-        const STORAGE_KEY = 'geoFinalBattleData_zettel_v1';
+        const STORAGE_KEY = 'geoFinalBattleData_zettel_v2';
         let studyQueue = [];
         let currentIndex = 0;
         let cardStates = [];
@@ -258,11 +279,54 @@
         const progressInfo = document.getElementById('progress-info');
         const backToQueueBtn = document.getElementById('back-to-queue-btn');
 
-        const shuffleArray = (array) => { /* ... (変更なし) ... */ };
-        const loadCardStates = () => { /* ... (変更なし、ただしprocessedCardDataの長さを使う) ... */ };
-        const initializeCardStates = () => { /* ... (変更なし) ... */ };
-        const saveCardStates = () => { /* ... (変更なし) ... */ };
-        const updateDashboard = () => { /* ... (変更なし) ... */ };
+        // --- 修正: 未定義だった関数をすべて定義 ---
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const loadCardStates = () => {
+            try {
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    // 修正: cardData.length を使う
+                    if (Array.isArray(parsedData) && parsedData.length === cardData.length) {
+                        cardStates = parsedData;
+                        return;
+                    }
+                }
+            } catch (e) { 
+                console.error("データ読み込みエラー:", e); 
+            }
+            initializeCardStates();
+        };
+
+        const initializeCardStates = () => {
+            // 修正: cardData.map を使う
+            cardStates = cardData.map((_, i) => ({ id: i, status: 'unseen' }));
+            saveCardStates();
+        };
+
+        const saveCardStates = () => {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cardStates));
+            } catch (e) {
+                console.error("データ保存エラー:", e);
+            }
+        };
+
+        const updateDashboard = () => {
+            // 修正: cardData.length を使う
+            document.getElementById('total-value').textContent = cardData.length;
+            document.getElementById('unseen-value').textContent = cardStates.filter(s => s.status === 'unseen').length;
+            document.getElementById('review-value').textContent = cardStates.filter(s => s.status === 'review').length;
+            document.getElementById('mastered-value').textContent = cardStates.filter(s => s.status === 'mastered').length;
+        };
+
         const updateProgress = () => {
             if (studyContextStack.length > 0) {
                 progressInfo.textContent = '関連カードを学習中...';
@@ -274,19 +338,52 @@
         };
 
         const startStudy = (filterType) => {
-            // ... (変更なし) ...
+             if (filterType === 'all') {
+                const reviewItems = cardStates.filter(s => s.status === 'review').map(s => s.id);
+                const unseenItems = cardStates.filter(s => s.status === 'unseen').map(s => s.id);
+                
+                shuffleArray(reviewItems);
+                shuffleArray(unseenItems);
+                
+                studyQueue = [...reviewItems, ...unseenItems];
+            } else { // review
+                studyQueue = cardStates.filter(s => s.status === 'review').map(s => s.id);
+                shuffleArray(studyQueue);
+            }
+            
+            if (studyQueue.length === 0) {
+                const message = filterType === 'review' ? 
+                    '「苦手」のカードはありません！\n全範囲で学習を開始しますか？' : 
+                    'おめでとうございます！学習対象のカードは全て完璧です。';
+                
+                if (filterType === 'review' && cardStates.some(s => s.status === 'unseen')) {
+                    if (confirm(message)) {
+                        startStudy('all');
+                    }
+                } else {
+                    alert(message);
+                }
+                return;
+            }
+
             studyContextStack = []; // 学習開始時にスタックをリセット
             backToQueueBtn.style.display = 'none';
+            currentIndex = 0;
+
+            dashboard.style.display = 'none';
+            studyScreen.style.display = 'flex';
+            
+            // 修正: 最初のカードを正しく表示
             renderCard(studyQueue[currentIndex]);
         };
         
-        // renderCurrentCardを汎用的なrenderCardに改名
         const renderCard = (cardId, isJump = false) => {
             if (cardId === undefined) {
                 if (!isJump) showCompletionMessage();
                 return;
             }
 
+            // 既存カードのクリーンアップ
             const existingCard = cardArea.querySelector('.card');
             if (existingCard) {
                 if (existingCard._eventCleanup) existingCard._eventCleanup();
@@ -299,7 +396,7 @@
             }
 
             const state = cardStates[cardId];
-            const data = processedCardData[cardId];
+            const data = cardData[cardId];
             
             const cardElement = document.createElement('div');
             cardElement.className = 'card';
@@ -322,7 +419,8 @@
             cardArea.appendChild(cardElement);
             currentCard = cardElement;
             
-            setTimeout(() => setupCardEvents(cardElement, cardId, isJump), 50);
+            // 修正: setTimeout を使わず、直接イベントを設定
+            setupCardEvents(cardElement, cardId, isJump);
             updateProgress();
         };
 
@@ -338,6 +436,7 @@
                 card.classList.add('is-flipped');
                 isFlipped = true;
                 
+                // 修正: setTimeoutでラップしてアニメーション完了を待つ
                 setTimeout(() => {
                     if (!isJump) evalFooter.classList.add('show');
                     renderRelatedCards(cardId);
@@ -353,22 +452,23 @@
             const listContainer = currentCard.querySelector('.related-cards-list');
             if (!listContainer) return;
 
-            const currentData = processedCardData[cardId];
+            const currentData = cardData[cardId];
             let relatedIds = new Set(currentData.related || []);
 
-            // 同じトピックのカードも関連候補に追加（最大3件）
-            processedCardData
+            // 修正: 同じトピックのカードも関連候補に追加（最大3件）
+            cardData
                 .filter(c => c.topic === currentData.topic && c.id !== cardId)
                 .slice(0, 3)
                 .forEach(c => relatedIds.add(c.id));
 
             if (relatedIds.size === 0) {
-                listContainer.innerHTML = '<li>関連カードはありません</li>';
+                listContainer.innerHTML = '関連カードはありません';
                 return;
             }
 
+            listContainer.innerHTML = ''; // コンテナをクリア
             relatedIds.forEach(id => {
-                const relatedData = processedCardData[id];
+                const relatedData = cardData[id];
                 if (relatedData) {
                     const btn = document.createElement('button');
                     btn.className = 'related-card-btn';
@@ -383,10 +483,11 @@
         };
 
         const jumpToCard = (targetId) => {
-            // 現在の学習コンテキストをスタックに保存
-            // ジャンプ先からのジャンプはスタックを上書き
             if (studyContextStack.length === 0) {
                 studyContextStack.push({ queue: studyQueue, index: currentIndex });
+            } else {
+                // 既にジャンプ中の場合は、スタックのトップを更新するだけ
+                // (ジャンプのジャンプからの戻り先は最初のジャンプ元)
             }
             renderCard(targetId, true);
         };
@@ -397,7 +498,7 @@
                 studyQueue = lastContext.queue;
                 currentIndex = lastContext.index;
                 backToQueueBtn.style.display = 'none';
-                renderCard(studyQueue[currentIndex]); // 学習フローに戻る
+                renderCard(studyQueue[currentIndex]);
             }
         });
 
@@ -426,18 +527,54 @@
             }, 250);
         };
 
-        const showCompletionMessage = () => { /* ... (変更なし) ... */ };
+        const showCompletionMessage = () => {
+            const reviewCount = cardStates.filter(s => s.status === 'review').length;
+            const masteredCount = cardStates.filter(s => s.status === 'mastered').length;
+            
+            let message = '🎉 セッション完了！\n\n';
+            message += `完璧: ${masteredCount}問\n`;
+            message += `苦手: ${reviewCount}問\n\n`;
+            
+            if (reviewCount > 0) {
+                message += '「苦手だけを潰す」で復習しましょう！';
+            } else {
+                message += '全問完璧です！お疲れ様でした！';
+            }
+            
+            alert(message);
+            showDashboard();
+        };
+
         const showDashboard = () => {
+            isTransitioning = false;
             studyContextStack = [];
             backToQueueBtn.style.display = 'none';
-            /* ... (他の部分は変更なし) ... */
+            dashboard.style.display = 'flex';
+            studyScreen.style.display = 'none';
+            evalFooter.classList.remove('show');
+            updateDashboard();
+            
+            const existingCard = cardArea.querySelector('.card');
+            if (existingCard) {
+                if (existingCard._eventCleanup) existingCard._eventCleanup();
+                existingCard.remove();
+            }
+            currentCard = null;
         };
 
         // イベントリスナー設定
         document.getElementById('start-all-btn').addEventListener('click', () => startStudy('all'));
         document.getElementById('start-review-btn').addEventListener('click', () => startStudy('review'));
         document.getElementById('back-to-dash').addEventListener('click', showDashboard);
-        document.getElementById('reset-progress').addEventListener('click', () => { /* ... (変更なし) ... */ });
+        document.getElementById('reset-progress').addEventListener('click', () => {
+            if (confirm('⚠️ 警告\n\nすべての学習記録がリセットされます。\nよろしいですか？')) {
+                initializeCardStates();
+                updateDashboard();
+                alert('学習記録をリセットしました。');
+            }
+        });
+
+        // 修正: イベントハンドラーをシンプルに実装
         document.getElementById('eval-review').addEventListener('click', () => evaluateCard('review'));
         document.getElementById('eval-mastered').addEventListener('click', () => evaluateCard('mastered'));
 
@@ -445,9 +582,6 @@
         loadCardStates();
         updateDashboard();
         showDashboard();
-        
-        // --- 変更のない関数定義をここに含める ---
-        // (shuffleArray, loadCardStates, initializeCardStates, saveCardStates, updateDashboard, showCompletionMessage, etc.)
     });
     </script>
 </body>
