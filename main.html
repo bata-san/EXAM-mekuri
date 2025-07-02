@@ -211,7 +211,7 @@
                 <div class="progress-info" id="progress-info"></div>
             </div>
             <div class="card-area" id="card-area">
-                <div class="swipe-indicator"></div>
+                <div class="swipe-indicator">← 左スワイプでスキップ</div>
             </div>
             <div id="back-to-dash" title="ダッシュボードに戻る">✕</div>
             
@@ -464,7 +464,7 @@
                         <div class="question">${data.q}</div>
                     </div>
                     <div class="card-face card-back">
-                        <div class="answer">${data.a}</div>
+                        <div class="answer"></div>
                     </div>
                 </div>
             `;
@@ -507,6 +507,15 @@
                 
                 // カードフリップ時にスワイプインジケーターを非表示
                 hideSwipeIndicator();
+                
+                // フリップアニメーションの途中で裏面の内容を追加
+                setTimeout(() => {
+                    const answerDiv = card.querySelector('.card-back .answer');
+                    if (answerDiv && !answerDiv.innerHTML) {
+                        const data = cardData[cardId];
+                        answerDiv.innerHTML = data.a;
+                    }
+                }, 150); // フリップアニメーションの半分の時点
                 
                 // 評価ボタンを表示
                 setTimeout(() => {
