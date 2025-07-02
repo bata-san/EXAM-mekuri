@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地理総合 最終進化版暗記カード</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f8; --card-bg: #ffffff; --primary-color: #007bff;
+            --success-color: #28a745; --warning-color: #dc3545; --info-color: #17a2b8;
+            --text-color: #212529; --muted-text-color: #6c757d;
+            --shadow-color: rgba(0, 0, 0, 0.08); --border-color: #dee2e6;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { text-align: center; color: var(--primary-color); margin-bottom: 20px; }
+        .controls { background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color); margin-bottom: 25px; }
+        .control-section { margin-bottom: 15px; }
+        .control-section:last-child { margin-bottom: 0; }
+        .control-label { font-weight: 600; margin-bottom: 10px; display: block; color: var(--primary-color); }
+        .control-group { display: flex; flex-wrap: wrap; gap: 8px; }
+        .control-group button, .control-group label { padding: 8px 16px; font-size: 14px; font-weight: 500; cursor: pointer; border: 1px solid var(--border-color); border-radius: 20px; background-color: #f8f9fa; transition: all 0.2s ease; }
+        .control-group button:hover, .control-group label:hover { background-color: #e9ecef; }
+        .control-group input[type="radio"], .control-group input[type="checkbox"] { display: none; }
+        .control-group input[type="radio"]:checked + label { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .control-group input[type="checkbox"]:checked + label { background-color: var(--info-color); color: white; border-color: var(--info-color); }
+        #mode-toggle-group label { width: 100px; text-align: center; }
+        #mode-toggle-group input[type="radio"]:checked + label { background-color: var(--success-color); border-color: var(--success-color); }
+
+        .progress-tracker { text-align: center; font-weight: 500; color: var(--muted-text-color); margin-bottom: 25px; }
+        .card-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { background-color: transparent; height: 220px; perspective: 1000px; position: relative; }
+        .card.hidden { display: none; }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s, box-shadow 0.3s; transform-style: preserve-3d; box-shadow: 0 4px 12px var(--shadow-color); border-radius: 10px; border: 2px solid transparent; }
+        .card.is-flipped .card-inner { transform: rotateY(180deg); }
+        
+        .card-face { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; border-radius: 8px; background-color: var(--card-bg); }
+        .card-front { font-weight: 600; cursor: pointer; text-align: center; }
+        .card-back { transform: rotateY(180deg); }
+        
+        .topic-tag { position: absolute; top: 10px; left: 10px; background-color: rgba(0, 123, 255, 0.1); color: var(--primary-color); font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 10px; }
+        .card[data-status="mastered"] .card-inner { border-color: var(--success-color); }
+        .card[data-status="needs-review"] .card-inner { border-color: var(--warning-color); }
+
+        .answer-feedback { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.9); z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 3em; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .answer-feedback.correct { color: var(--success-color); opacity: 1; }
+        .answer-feedback.incorrect { color: var(--warning-color); opacity: 1; }
+        
+        .answer-display { margin-top: 10px; font-weight: bold; color: var(--primary-color); visibility: hidden; }
+        .answer-display.visible { visibility: visible; }
+        
+        .test-input { width: 80%; padding: 8px; border: 1px solid var(--border-color); border-radius: 5px; margin-bottom: 10px; text-align: center; }
+        .test-submit { width: 60%; padding: 8px; background-color: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer; }
+
+        .self-eval { display: flex; gap: 10px; width: 100%; justify-content: center; }
+        .eval-btn { padding: 8px 15px; font-size: 14px; border: none; border-radius: 20px; cursor: pointer; }
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-warning { background-color: var(--warning-color); color: white; }
+        strong { color: #d63384; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>地理総合 最終進化版暗記カード</h1>
+        <div class="controls">
+            <div class="control-section">
+                <span class="control-label">学習モード</span>
+                <div class="control-group" id="mode-toggle-group">
+                    <input type="radio" name="mode" id="mode-memorize" checked><label for="mode-memorize">暗記モード</label>
+                    <input type="radio" name="mode" id="mode-test"><label for="mode-test">テストモード</label>
+                </div>
+            </div>
+            <div id="filter-controls">
+                <div class="control-section"><span class="control-label">習熟度フィルター</span><div class="control-group" id="status-filter-group"></div></div>
+                <div class="control-section"><span class="control-label">分野フィルター</span><div class="control-group" id="topic-filter-group"></div></div>
+            </div>
+            <div class="control-section"><span class="control-label">操作</span><div class="control-group"><button id="shuffle-cards">問題をシャッフル</button><button id="reset-progress">進捗をリセット</button></div></div>
+        </div>
+        <div class="progress-tracker"><span id="progress-text"></span></div>
+        <div class="card-container" id="card-container"></div>
+    </div>
+    <script>
+    const cardData = [
+        // 既存の約90問のデータ...
+        { topic: "地形", q: "氷河の侵食でできたU字谷に海水が侵入してできた海岸地形は？", a: "<strong>フィヨルド</strong>", key: ["フィヨルド"] },
+        { topic: "地形", q: "氷河が山頂付近を削ってできた、お椀型の谷を何というか？", a: "<strong>カール（圏谷）</strong>", key: ["カール", "圏谷"] },
+        { topic: "地形", q: "氷河が運んだ土砂が堆積してできた丘を何と呼ぶか？", a: "<strong>モレーン</strong>", key: ["モレーン"] },
+        { topic: "地形", q: "河川が山地から平野に出る所にできる、扇状の地形は？", a: "<strong>扇状地</strong>", key: ["扇状地"] },
+        { topic: "地形", q: "扇状地の中央部（扇央）でよく見られる、普段は水が流れない川は？", a: "<strong>水無川</strong>", key: ["水無川", "みずなしがわ"] },
+        { topic: "地形", q: "扇状地の末端（扇端）では、何が湧き出すため集落が発達しやすいか？", a: "<strong>湧水</strong>", key: ["湧水"] },
+        { topic: "地形", q: "河川が蛇行する下流部に形成される平野を何と呼ぶか？", a: "<strong>氾濫原</strong>", key: ["氾濫原"] },
+        { topic: "地形", q: "氾濫原において、洪水時に土砂が堆積してできた微高地は？", a: "<strong>自然堤防</strong>", key: ["自然堤防"] },
+        { topic: "地形", q: "自然堤防の背後にある、水はけの悪い低湿地を何と呼ぶか？", a: "<strong>後背湿地</strong>", key: ["後背湿地"] },
+        { topic: "地形", q: "河川の蛇行がショートカットされ、取り残されてできた湖は？", a: "<strong>三日月湖</strong>", key: ["三日月湖"] },
+        { topic: "地形", q: "河口付近に運ばれた土砂が堆積してできる三角形の地形は？", a: "<strong>三角州（デルタ）</strong>", key: ["三角州", "デルタ"] },
+        { topic: "地形", q: "硬い水平な地層が侵食から残ってできたテーブル状の地形は？", a: "<strong>メサ</strong>", key: ["メサ"] },
+        { topic: "地形", q: "メサがさらに侵食されてできた、孤立した岩山は？", a: "<strong>ビュート</strong>", key: ["ビュート"] },
+        { topic: "地形", q: "乾燥地域で降雨時のみ水が流れる川を何というか？", a: "<strong>ワジ（涸れ川）</strong>", key: ["ワジ", "涸れ川", "かれがわ"] },
+        { topic: "地形", q: "砂漠の種類のうち、岩盤が露出したものを何というか？", a: "<strong>岩石砂漠（ハマダ）</strong>", key: ["岩石砂漠", "ハマダ"] },
+        { topic: "地形", q: "砂漠の種類のうち、砂で覆われたものを何というか？", a: "<strong>砂砂漠（エルグ）</strong>", key: ["砂砂漠", "エルグ"] },
+        { topic: "地形", q: "石灰岩が水に溶食されてできる地形を総称して何というか？", a: "<strong>カルスト地形</strong>", key: ["カルスト地形", "カルスト"] },
+        { topic: "地形", q: "カルスト地形で見られる、すり鉢状のくぼ地は？", a: "<strong>ドリーネ</strong>", key: ["ドリーネ"] },
+        { topic: "地形", q: "ドリーネが複数つながってできた、より大きなくぼ地は？", a: "<strong>ウバーレ</strong>", key: ["ウバーレ"] },
+        { topic: "地形", q: "カルスト地形の地下に見られる、石灰岩が溶けてできた洞窟は？", a: "<strong>鍾乳洞</strong>", key: ["鍾乳洞"] },
+        { topic: "気候", q: "ある地域の長期間（約30年）にわたる大気の平均状態を何というか？", a: "<strong>気候</strong>", key: ["気候"] },
+        { topic: "気候", q: "気候を構成する3大要素は？", a: "<strong>気温、降水、風</strong>", key: ["気温降水風", "気温、降水、風"] },
+        { topic: "気候", q: "標高が100m上がると気温は約何度下がるか？これを何と呼ぶ？", a: "<strong>0.65℃</strong>（気温の<strong>逓減率</strong>）", key: ["0.65", "逓減率"] },
+        { topic: "気候", q: "湿った空気が山を越え、風下側で高温・乾燥の風となる現象は？", a: "<strong>フェーン現象</strong>", key: ["フェーン現象", "フェーン"] },
+        { topic: "気候", q: "南米ペルー沖を北上し、沿岸に砂漠を形成する原因となる寒流は？", a: "<strong>ペルー海流</strong>", key: ["ペルー海流", "フンボルト海流"] },
+        { topic: "気候", q: "地球の自転によって風が曲げられる力を何と呼ぶ？", a: "<strong>転向力（コリオリの力）</strong>", key: ["転向力", "コリオリの力"] },
+        { topic: "気候", q: "赤道付近で上昇気流が発生し、雨雲が発達する地帯は？", a: "<strong>熱帯収束帯（赤道低圧帯）</strong>", key: ["熱帯収束帯", "赤道低圧帯"] },
+        { topic: "気候", q: "緯度30度付近で下降気流が発生し、砂漠の原因となる地帯は？", a: "<strong>亜熱帯高圧帯</strong>", key: ["亜熱帯高圧帯", "中緯度高圧帯"] },
+        { topic: "気候", q: "亜熱帯高圧帯から熱帯収束帯に向かって吹く恒常風は？", a: "<strong>貿易風</strong>", key: ["貿易風"] },
+        { topic: "気候", q: "中緯度帯で一年中西から東へ吹く恒常風は？", a: "<strong>偏西風</strong>", key: ["偏西風"] },
+        { topic: "気候", q: "大陸と海洋の熱されやすさの違いにより、夏と冬で風向きが逆になる風は？", a: "<strong>季節風（モンスーン）</strong>", key: ["季節風", "モンスーン"] },
+        { topic: "気候", q: "冬の日本の日本海側に大雪をもたらす季節風の風向は？", a: "<strong>北西</strong>", key: ["北西"] },
+        { topic: "気候", q: "熱帯低気圧の地域別呼称3つは？(北西太平洋・インド洋・大西洋)", a: "<strong>台風・サイクロン・ハリケーン</strong>", key: ["台風サイクロンハリケーン"] },
+        { topic: "気候区分", q: "気温と植生に基づき気候を分類したドイツの学者は？", a: "<strong>ケッペン</strong>", key: ["ケッペン"] },
+        { topic: "気候区分", q: "ケッペンのA, B, C, D, Eの気候帯名を答えよ。", a: "<strong>熱帯・乾燥帯・温帯・冷帯・寒帯</strong>", key: ["熱帯乾燥帯温帯冷帯寒帯"] },
+        { topic: "気候区分", q: "樹木が生育できるA,C,D気候をまとめて何と呼ぶか？", a: "<strong>樹木気候</strong>", key: ["樹木気候"] },
+        { topic: "気候区分", q: "樹木が生育できないB,E気候をまとめて何と呼ぶか？", a: "<strong>無樹木気候</strong>", key: ["無樹木気候"] },
+        { topic: "気候区分", q: "樹木気候と無樹木気候を分ける基準は？", a: "最暖月の平均気温が<strong>10℃</strong>以上か未満か", key: ["10"] },
+        { topic: "気候区分", q: "熱帯(A)の定義は、最寒月の平均気温が何度以上か？", a: "<strong>18℃</strong>", key: ["18"] },
+        { topic: "気候区分", q: "温帯(C)と冷帯(D)を分ける基準は、最寒月の平均気温が何度か？", a: "<strong>-3℃</strong>", key: ["-3", "マイナス3"] },
+        { topic: "気候区分", q: "2文字目 'f' (feucht) はどんな降水パターン？", a: "<strong>湿潤</strong> (明確な乾季がない)", key: ["f", "湿潤"] },
+        { topic: "気候区分", q: "2文字目 'w' (wintertrocken) はどんな降水パターン？", a: "<strong>冬に乾季</strong>がある", key: ["w", "冬乾燥", "冬乾季"] },
+        { topic: "気候区分", q: "2文字目 's' (sommertrocken) はどんな降水パターン？", a: "<strong>夏に乾季</strong>がある", key: ["s", "夏乾燥", "夏乾季"] },
+        { topic: "気候区分", q: "Afの厳密な定義は、最も雨が少ない月の降水量が何mm以上か？", a: "<strong>60mm</strong>", key: ["60"] },
+        { topic: "気候区分", q: "3文字目 'a' が示す夏の特徴と、その基準温度は？", a: "<strong>暑い夏</strong> (最暖月平均気温が<strong>22℃以上</strong>)", key: ["a", "22"] },
+        { topic: "気候区分", q: "B気候の'W'と'S'は何の略？", a: "W: <strong>砂漠</strong>, S: <strong>ステップ</strong>", key: ["W", "S", "砂漠", "ステップ"] },
+        { topic: "気候区分", q: "E気候の'T'と'F'は何の略？", a: "T: <strong>ツンドラ</strong>, F: <strong>氷雪</strong>", key: ["T", "F", "ツンドラ", "氷雪"] },
+        { topic: "生活・植生・土壌", q: "熱帯雨林(Af)でみられる、森林を焼いて農地にする伝統農法は？", a: "<strong>焼畑農業</strong>", key: ["焼畑農業", "焼畑"] },
+        { topic: "生活・植生・土壌", q: "熱帯雨林(Af)に分布する、栄養分が乏しい赤色の土壌は？", a: "<strong>ラトソル</strong>", key: ["ラトソル"] },
+        { topic: "生活・植生・土壌", q: "熱帯雨林(Af)の伝統的な住居に見られる、湿気や害虫を防ぐ工夫は？", a: "<strong>高床式住居</strong>", key: ["高床式", "高床"] },
+        { topic: "生活・植生・土壌", q: "サバナ気候(Aw)の植生は、何と呼ばれる草原に樹木が点在するものか？", a: "<strong>長草草原（サバナ）</strong>", key: ["サバナ", "長草草原"] },
+        { topic: "生活・植生・土壌", q: "南米オリノコ川流域の熱帯草原を特に何と呼ぶか。", a: "<strong>リャノ</strong>", key: ["リャノ"] },
+        { topic: "生活・植生・土壌", q: "ブラジル高原の熱帯草原を特に何と呼ぶか。", a: "<strong>カンポ</strong>", key: ["カンポ"] },
+        { topic: "生活・植生・土壌", q: "サバナ気候(Aw)で見られる、商品作物を大規模に栽培する農業は？", a: "<strong>プランテーション農業</strong>", key: ["プランテーション"] },
+        { topic: "生活・植生・土壌", q: "ブラジル高原のコーヒー栽培に適した、玄武岩由来の赤紫色土壌は？", a: "<strong>テラローシャ</strong>", key: ["テラローシャ"] },
+        { topic: "生活・植生・土壌", q: "ステップ気候(BS)の植生である、丈の短い草原を何と呼ぶ？", a: "<strong>短草草原（ステップ）</strong>", key: ["ステップ", "短草草原"] },
+        { topic: "生活・植生・土壌", q: "北米のプレーリーに分布する肥沃な黒色土は？", a: "<strong>プレーリー土</strong>", key: ["プレーリー土"] },
+        { topic: "生活・植生・土壌", q: "ウクライナのステップに分布し、世界で最も肥沃な黒色土は？", a: "<strong>チェルノーゼム</strong>", key: ["チェルノーゼム"] },
+        { topic: "生活・植生・土壌", q: "イランなどで見られる、乾燥地域の伝統的な地下水路を何と呼ぶか？", a: "<strong>カナート</strong>", key: ["カナート"] },
+        { topic: "生活・植生・土壌", q: "乾燥帯の伝統的な移動式の生活様式は？", a: "<strong>遊牧</strong>", key: ["遊牧"] },
+        { topic: "生活・植生・土壌", q: "乾燥帯の伝統的な住居で、日干しレンガで作られた家の特徴は？", a: "<strong>厚い壁、小さな窓</strong>", key: ["厚い壁", "日干しレンガ"] },
+        { topic: "生活・植生・土壌", q: "サハラ砂漠南縁で深刻化している、土地の劣化現象を何というか？", a: "<strong>砂漠化</strong>", key: ["砂漠化"] },
+        { topic: "生活・植生・土壌", q: "温暖湿潤気候(Cfa)や西岸海洋性気候(Cfb)に分布する、温帯の肥沃な土壌は？", a: "<strong>褐色森林土</strong>", key: ["褐色森林土"] },
+        { topic: "生活・植生・土壌", q: "東アジアのCfa, Cw気候帯で見られる、カシやシイなどの常緑広葉樹林は？", a: "<strong>照葉樹林</strong>", key: ["照葉樹林"] },
+        { topic: "生活・植生・土壌", q: "西岸海洋性気候(Cfb)に影響を与える恒常風と海流は？", a: "<strong>偏西風</strong> と <strong>暖流</strong>", key: ["偏西風", "暖流"] },
+        { topic: "生活・植生・土壌", q: "西岸海洋性気候(Cfb)の代表的な植生は、ブナなどの何の森林か？", a: "<strong>落葉広葉樹林</strong>", key: ["落葉広葉樹林"] },
+        { topic: "生活・植生・土壌", q: "西岸海洋性気候(Cfb)で行われる、穀物栽培と家畜飼育を組み合わせた農業は？", a: "<strong>混合農業</strong>", key: ["混合農業"] },
+        { topic: "生活・植生・土壌", q: "地中海性気候(Cs)の夏が乾燥する理由は、何の影響下に入るからか？", a: "夏に<strong>亜熱帯高圧帯</strong>が北上するため", key: ["亜熱帯高圧帯"] },
+        { topic: "生活・植生・土壌", q: "地中海性気候(Cs)の代表的な農業と、その作物2つは？", a: "<strong>地中海式農業</strong> (<strong>オリーブ</strong>, <strong>ブドウ</strong>など)", key: ["地中海式農業", "オリーブ", "ブドウ"] },
+        { topic: "生活・植生・土壌", q: "地中海性気候(Cs)の植生で、夏の乾燥に耐える葉の硬い樹木を何と呼ぶか？", a: "<strong>硬葉樹林</strong>", key: ["硬葉樹林"] },
+        { topic: "生活・植生・土壌", q: "地中海沿岸の石灰岩が風化してできた赤色の土壌は？", a: "<strong>テラロッサ</strong>", key: ["テラロッサ"] },
+        { topic: "生活・植生・土壌", q: "冷帯(D)に広がる、シベリアなどの広大な針葉樹林帯を何と呼ぶか？", a: "<strong>タイガ</strong>", key: ["タイガ"] },
+        { topic: "生活・植生・土壌", q: "冷帯(D)の代表的な土壌で、酸性の灰白色の土を何と呼ぶか？", a: "<strong>ポドゾル</strong>", key: ["ポドゾル"] },
+        { topic: "生活・植生・土壌", q: "冷帯(D)の住居に見られる、厳しい寒さや積雪への備えは？", a: "<strong>壁が厚い</strong>、<strong>窓が小さい（二重窓）</strong>など", key: ["厚い壁", "二重窓"] },
+        { topic: "生活・植生・土壌", q: "ツンドラ気候(ET)の植生は何が中心か？", a: "<strong>コケ類</strong>、<strong>地衣類</strong>", key: ["コケ", "地衣類"] },
+        { topic: "生活・植生・土壌", q: "ツンドラ気候(ET)で見られる、夏になっても溶けない地中の土壌は？", a: "<strong>永久凍土</strong>", key: ["永久凍土"] },
+        { topic: "生活・植生・土壌", q: "氷雪気候(EF)が分布する主な地域2つは？", a: "<strong>南極大陸</strong>、<strong>グリーンランド</strong>内陸部", key: ["南極", "グリーンランド"] },
+        { topic: "生活・植生・土壌", q: "標高が高くなるにつれて植生が変化する様子を何と呼ぶ？", a: "<strong>垂直的植生分布</strong>", key: ["垂直的植生分布", "垂直分布"] },
+        { topic: "生活・植生・土壌", q: "アンデス山脈などの高山気候(H)で飼育される家畜2種は？", a: "<strong>リャマ</strong>、<strong>アルパカ</strong>", key: ["リャマ", "アルパカ"] }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const cardContainer = document.getElementById('card-container');
+        let cardElements = [];
+        let currentMode = 'memorize';
+        let testSession = { correct: 0, total: 0 };
+
+        function createCardElement(cardData, index) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.id = index;
+            card.dataset.status = 'unseen';
+            card.dataset.topic = cardData.topic;
+            
+            const front = `<div class="card-face card-front"><span class="topic-tag">${cardData.topic}</span>${cardData.q}</div>`;
+            const backMemorize = `<div class="card-face card-back"><div class="self-eval"><button class="eval-btn btn-success" data-action="mastered">できた！</button><button class="eval-btn btn-warning" data-action="needs-review">苦手...</button></div><div class="answer-display">${cardData.a}</div></div>`;
+            const backTest = `<div class="card-face card-back"><div class="answer-feedback"></div><input type="text" class="test-input" placeholder="答えを入力..."><button class="test-submit">解答</button><div class="answer-display">${cardData.a}</div></div>`;
+            
+            card.innerHTML = `<div class="card-inner">${front}${currentMode === 'memorize' ? backMemorize : backTest}</div>`;
+            
+            card.querySelector('.card-front').addEventListener('click', () => {
+                card.classList.toggle('is-flipped');
+                if (currentMode === 'memorize') {
+                    card.querySelector('.answer-display').classList.add('visible');
+                }
+            });
+
+            if (currentMode === 'memorize') {
+                card.querySelectorAll('.eval-btn').forEach(btn => btn.addEventListener('click', e => handleSelfEval(e, card)));
+            } else {
+                const input = card.querySelector('.test-input');
+                card.querySelector('.test-submit').addEventListener('click', e => handleTestSubmit(e, card));
+                input.addEventListener('keydown', e => { if (e.key === 'Enter') handleTestSubmit(e, card); });
+            }
+            return card;
+        }
+
+        function handleSelfEval(e, card) {
+            e.stopPropagation();
+            card.dataset.status = (card.dataset.status === e.target.dataset.action) ? 'unseen' : e.target.dataset.action;
+            card.classList.remove('is-flipped');
+            updateUI();
+        }
+
+        function handleTestSubmit(e, card) {
+            e.stopPropagation();
+            const input = card.querySelector('.test-input');
+            if (input.disabled) return;
+
+            const userAnswer = input.value;
+            const keys = cardData[card.dataset.id].key;
+            const isCorrect = keys.some(key => normalize(userAnswer).includes(normalize(key)));
+            
+            const feedback = card.querySelector('.answer-feedback');
+            feedback.textContent = isCorrect ? '正解' : '不正解';
+            feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            testSession.total++;
+            if(isCorrect) testSession.correct++;
+            
+            card.querySelector('.answer-display').classList.add('visible');
+            input.disabled = true;
+
+            setTimeout(() => { feedback.style.opacity = '0'; }, 1500);
+            updateProgress();
+        }
+
+        function normalize(str) {
+            return str.toLowerCase().replace(/（/g, '(').replace(/）/g, ')').replace(/、|・/g, '').replace(/[ぁ-ん]/g, s => String.fromCharCode(s.charCodeAt(0) + 0x60)).trim();
+        }
+
+        function renderAllCards() {
+            cardContainer.innerHTML = '';
+            cardElements = cardData.map((card, index) => createCardElement(card, index));
+            cardElements.forEach(card => cardContainer.appendChild(card));
+            updateUI();
+        }
+
+        function setupFilters() {
+            document.getElementById('status-filter-group').innerHTML = `<input type="radio" name="status-filter" id="filter-all" checked><label for="filter-all">すべて</label><input type="radio" name="status-filter" id="filter-unseen"><label for="filter-unseen">未学習</label><input type="radio" name="status-filter" id="filter-review"><label for="filter-review">苦手</label>`;
+            const topics = [...new Set(cardData.map(c => c.topic))];
+            const topicGroup = document.getElementById('topic-filter-group');
+            topicGroup.innerHTML = `<input type="checkbox" id="topic-all" checked><label for="topic-all">全分野</label>`;
+            topics.forEach(topic => { topicGroup.innerHTML += `<input type="checkbox" name="topic-filter" id="topic-${topic}"><label for="topic-${topic}">${topic}</label>`; });
+        }
+        
+        function updateUI() {
+            updateProgress();
+            applyFilters();
+        }
+        
+        function updateProgress() {
+            if(currentMode === 'memorize') {
+                const total = cardElements.length;
+                const mastered = cardElements.filter(c => c.dataset.status === 'mastered').length;
+                const reviewed = cardElements.filter(c => c.dataset.status === 'needs-review').length;
+                const done = mastered + reviewed;
+                document.getElementById('progress-text').textContent = `学習状況: ${done} / ${total}`;
+            } else {
+                const accuracy = testSession.total > 0 ? Math.round((testSession.correct / testSession.total) * 100) : 0;
+                document.getElementById('progress-text').textContent = `テスト結果: ${testSession.correct} / ${testSession.total} 正解 (正答率 ${accuracy}%)`;
+            }
+        }
+        
+        function applyFilters() {
+            const statusFilter = document.querySelector('input[name="status-filter"]:checked').id;
+            const selectedTopics = Array.from(document.querySelectorAll('input[name="topic-filter"]:checked')).map(cb => cb.id.replace('topic-', ''));
+            const allTopicsSelected = document.getElementById('topic-all').checked;
+
+            cardElements.forEach(card => {
+                const { status, topic } = card.dataset;
+                let show = true;
+                if ((statusFilter === 'filter-unseen' && status !== 'unseen') || (statusFilter === 'filter-review' && status !== 'needs-review')) show = false;
+                if (!allTopicsSelected && !selectedTopics.includes(topic)) show = false;
+                card.classList.toggle('hidden', !show);
+            });
+        }
+        
+        document.querySelector('.controls').addEventListener('change', e => {
+            if(e.target.name === 'mode') {
+                currentMode = e.target.id.replace('mode-', '');
+                document.getElementById('filter-controls').style.display = currentMode === 'memorize' ? 'block' : 'none';
+                testSession = { correct: 0, total: 0 };
+                renderAllCards();
+            } else if(e.target.name === 'status-filter' || e.target.name === 'topic-filter' || e.target.id === 'topic-all') {
+                 if (e.target.id === 'topic-all') {
+                    document.querySelectorAll('input[name="topic-filter"]').forEach(cb => cb.checked = !e.target.checked);
+                } else if (e.target.name === 'topic-filter') {
+                    document.getElementById('topic-all').checked = !document.querySelector('input[name="topic-filter"]:checked');
+                }
+                applyFilters();
+            }
+        });
+
+        document.getElementById('shuffle-cards').addEventListener('click', () => {
+            for (let i = cardContainer.children.length; i >= 0; i--) { cardContainer.appendChild(cardContainer.children[Math.random() * i | 0]); }
+            alert('問題をシャッフルしました！');
+        });
+        document.getElementById('reset-progress').addEventListener('click', () => {
+            if (confirm('すべての学習記録をリセットしますか？')) {
+                if(currentMode === 'test') {
+                    testSession = { correct: 0, total: 0 };
+                }
+                renderAllCards();
+            }
+        });
+
+        setupFilters();
+        renderAllCards();
+    });
+    </script>
+</body>
+</html>
