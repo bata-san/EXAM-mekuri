@@ -162,17 +162,7 @@
         }
         #back-to-dash:hover { background: rgba(0,0,0,0.8); }
         
-        /* Swipe Indicator */
-        .swipe-indicator {
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%);
-            font-size: 14px; color: #6c757d; opacity: 0.7;
-            pointer-events: none; z-index: 50;
-            transition: opacity 0.3s ease;
-        }
-        .swipe-indicator.hidden {
-            opacity: 0;
-        }
+        /* スワイプインジケーターのスタイルを削除 */
         
         strong { color: #d63384; }
     </style>
@@ -211,7 +201,7 @@
                 <div class="progress-info" id="progress-info"></div>
             </div>
             <div class="card-area" id="card-area">
-                <div class="swipe-indicator"></div>
+                <!-- スワイプインジケーターのHTML要素を削除 -->
             </div>
             <div id="back-to-dash" title="ダッシュボードに戻る">✕</div>
             
@@ -405,30 +395,6 @@
             renderCurrentCard();
         };
 
-        // === スワイプインジケーター管理 ===
-        let swipeIndicatorTimer = null;
-        
-        const showSwipeIndicator = () => {
-            const indicator = cardArea.querySelector('.swipe-indicator');
-            if (indicator) {
-                indicator.classList.remove('hidden');
-                
-                // 3秒後に自動非表示
-                clearTimeout(swipeIndicatorTimer);
-                swipeIndicatorTimer = setTimeout(() => {
-                    hideSwipeIndicator();
-                }, 3000);
-            }
-        };
-        
-        const hideSwipeIndicator = () => {
-            const indicator = cardArea.querySelector('.swipe-indicator');
-            if (indicator) {
-                indicator.classList.add('hidden');
-            }
-            clearTimeout(swipeIndicatorTimer);
-        };
-
         // === カード表示 ===
         const renderCurrentCard = () => {
             // 学習完了チェック
@@ -440,7 +406,6 @@
             // 既存のカードを適切にクリア
             const existingCard = cardArea.querySelector('.card');
             if (existingCard) {
-                // イベントリスナーをクリーンアップ
                 if (existingCard._eventCleanup) {
                     existingCard._eventCleanup();
                 }
@@ -472,9 +437,6 @@
             cardArea.appendChild(cardElement);
             currentCard = cardElement;
             
-            // スワイプインジケーターを表示（新しいカードでは表示）
-            showSwipeIndicator();
-            
             // 短いディレイ後にイベントリスナーを設定（DOM安定化のため）
             setTimeout(() => {
                 setupCardEvents(cardElement, cardId);
@@ -484,29 +446,20 @@
             updateProgress();
         };
 
-        // === カードイベント設定 ===
+        // === カードイベント設定 (スワイプ機能を除去し、クリックのみに修正) ===
         const setupCardEvents = (card, cardId) => {
             let isFlipped = false;
-            let startX = 0;
-            let currentX = 0;
-            let isDragging = false;
             let isProcessing = false; // アニメーション中のフラグ
-            let dragThreshold = 15; // ドラッグ判定のしきい値
-            let swipeThreshold = 100; // スワイプ判定のしきい値
 
-            // カードタップで回転
+            // カードクリック（タップ）で回転
             const handleCardClick = (e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 
-                if (isDragging || isFlipped || isProcessing) return;
+                if (isFlipped || isProcessing) return;
                 
                 isProcessing = true;
                 card.classList.add('is-flipped');
                 isFlipped = true;
-                
-                // カードフリップ時にスワイプインジケーターを非表示
-                hideSwipeIndicator();
                 
                 // フリップアニメーションの途中で裏面の内容を追加
                 setTimeout(() => {
@@ -515,7 +468,7 @@
                         const data = cardData[cardId];
                         answerDiv.innerHTML = data.a;
                     }
-                }, 150); // フリップアニメーションの半分の時点
+                }, 150);
                 
                 // 評価ボタンを表示
                 setTimeout(() => {
@@ -524,121 +477,12 @@
                 }, 300);
             };
 
-            // タッチ/マウスイベント
-            const handleStart = (e) => {
-                if (isProcessing) return;
-                
-                e.preventDefault();
-                startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                currentX = startX;
-                isDragging = false;
-                
-                const cardInner = card.querySelector('.card-inner');
-                cardInner.style.transition = 'none';
-            };
+            // クリックイベントのみを追加
+            card.addEventListener('click', handleCardClick);
 
-            const handleMove = (e) => {
-                if (isProcessing) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-                const deltaX = currentX - startX;
-                
-                // ドラッグ判定のしきい値を超えた場合のみドラッグ開始
-                if (Math.abs(deltaX) > dragThreshold && !isDragging) {
-                    isDragging = true;
-                }
-                
-                if (isDragging) {
-                    const rotation = isFlipped ? 180 : 0;
-                    const cardInner = card.querySelector('.card-inner');
-                    cardInner.style.transform = `translateX(${deltaX}px) rotateY(${rotation}deg)`;
-                    
-                    // スワイプのフィードバック
-                    if (deltaX < -swipeThreshold) {
-                        cardInner.style.opacity = '0.7';
-                    } else {
-                        cardInner.style.opacity = '1';
-                    }
-                }
-            };
-
-            const handleEnd = (e) => {
-                if (isProcessing) return;
-                
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const deltaX = currentX - startX;
-                const cardInner = card.querySelector('.card-inner');
-                
-                cardInner.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-                cardInner.style.opacity = '1';
-                
-                if (isDragging && deltaX < -swipeThreshold) {
-                    // 左スワイプでスキップ
-                    isProcessing = true;
-                    cardInner.style.transform = 'translateX(-100%) scale(0.8)';
-                    cardInner.style.opacity = '0';
-                    
-                    setTimeout(() => {
-                        skipCurrentCard();
-                    }, 300);
-                } else if (isDragging) {
-                    // スワイプが不十分な場合は元の位置に戻す
-                    const rotation = isFlipped ? 180 : 0;
-                    cardInner.style.transform = `translateX(0) rotateY(${rotation}deg)`;
-                    
-                    // ドラッグ状態をリセット
-                    setTimeout(() => {
-                        isDragging = false;
-                    }, 300);
-                } else if (!isFlipped && Math.abs(deltaX) <= dragThreshold) {
-                    // タップでカード回転（ドラッグしていない場合のみ）
-                    handleCardClick(e);
-                }
-            };
-
-            // クリックイベント（デスクトップでのタップ）
-            const handleClick = (e) => {
-                if (isDragging || isProcessing) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                }
-                
-                if (!isFlipped) {
-                    handleCardClick(e);
-                }
-            };
-
-            // イベントリスナーを追加
-            // タッチイベント（モバイル）
-            card.addEventListener('touchstart', handleStart, { passive: false });
-            card.addEventListener('touchmove', handleMove, { passive: false });
-            card.addEventListener('touchend', handleEnd, { passive: false });
-
-            // マウスイベント（デスクトップ）
-            card.addEventListener('mousedown', handleStart);
-            card.addEventListener('mousemove', handleMove);
-            card.addEventListener('mouseup', handleEnd);
-            card.addEventListener('mouseleave', handleEnd);
-            
-            // クリックイベント（デスクトップでのタップ代替）
-            card.addEventListener('click', handleClick);
-
-            // カードが削除される時のクリーンアップ用にリスナー情報を保存
+            // カードが削除される時のクリーンアップ用
             card._eventCleanup = () => {
-                card.removeEventListener('touchstart', handleStart);
-                card.removeEventListener('touchmove', handleMove);
-                card.removeEventListener('touchend', handleEnd);
-                card.removeEventListener('mousedown', handleStart);
-                card.removeEventListener('mousemove', handleMove);
-                card.removeEventListener('mouseup', handleEnd);
-                card.removeEventListener('mouseleave', handleEnd);
-                card.removeEventListener('click', handleClick);
+                card.removeEventListener('click', handleCardClick);
             };
         };
 
@@ -651,26 +495,14 @@
             cardStates[cardId].status = status;
             saveCardStates();
             
-            // 評価ボタンを即座に無効化
             evalFooter.classList.remove('show');
             
-            // 次のカードへ
-            proceedToNextCard();
-        };
-
-        const skipCurrentCard = () => {
-            if (isTransitioning) return;
-            
-            isTransitioning = true;
-            
-            // 評価せずに次のカードへ
             proceedToNextCard();
         };
 
         const proceedToNextCard = () => {
             currentIndex++;
             
-            // カードのフェードアウトアニメーション
             if (currentCard) {
                 const cardInner = currentCard.querySelector('.card-inner');
                 if (cardInner) {
@@ -679,7 +511,6 @@
                 }
             }
             
-            // アニメーション後に次のカードを表示
             setTimeout(() => {
                 isTransitioning = false;
                 renderCurrentCard();
@@ -707,28 +538,21 @@
 
         // === ダッシュボード表示 ===
         const showDashboard = () => {
-            // 遷移フラグをリセット
             isTransitioning = false;
-            
-            // スワイプインジケーターのタイマーをクリア
-            clearTimeout(swipeIndicatorTimer);
             
             dashboard.style.display = 'flex';
             studyScreen.style.display = 'none';
             evalFooter.classList.remove('show');
             updateDashboard();
             
-            // カードエリアを適切にクリア
             const existingCard = cardArea.querySelector('.card');
             if (existingCard) {
-                // イベントリスナーをクリーンアップ
                 if (existingCard._eventCleanup) {
                     existingCard._eventCleanup();
                 }
                 existingCard.remove();
             }
             
-            // 現在のカード参照をクリア
             currentCard = null;
         };
 
@@ -745,9 +569,8 @@
             }
         });
 
-        // 評価ボタンのイベント（連続クリック防止）
         let lastEvalTime = 0;
-        const evalCooldown = 500; // 500ms のクールダウン
+        const evalCooldown = 500;
 
         document.getElementById('eval-review').addEventListener('click', (e) => {
             e.preventDefault();
