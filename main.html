@@ -3,60 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>地理 最終決戦モード (SRS + Zettelkasten Edition)</title>
+    <title>地理 超短期決戦モード</title>
     <style>
         :root {
-            --bg-color: #f0f2f5; --card-bg: #ffffff; --primary-color: #007bff;
-            --success-color: #28a745; --danger-color: #dc3545; --warning-color: #ffc107; --info-color: #17a2b8;
-            --text-color: #212529; --shadow-color: rgba(0, 0, 0, 0.12);
+            --bg-color: #1a1a1a; --card-bg: #2c2c2c; --primary-color: #00aaff;
+            --success-color: #28a745; --danger-color: #ff4757;
+            --text-color: #f0f0f0; --shadow-color: rgba(0, 0, 0, 0.4);
         }
         html, body { 
             height: 100%; margin: 0; padding: 0; overflow: hidden; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            background-color: var(--bg-color); color: var(--text-color);
         }
-        .app-container { 
-            display: flex; flex-direction: column; height: 100%; 
-            background-color: var(--bg-color); 
-        }
+        .app-container { display: flex; flex-direction: column; height: 100%; }
         
         /* Dashboard Screen */
         #dashboard { 
-            display: flex; flex-direction: column; align-items: center; 
-            height: 100%; padding: 20px; box-sizing: border-box; overflow-y: auto;
+            display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; height: 100%; padding: 20px; box-sizing: border-box; text-align: center;
         }
-        #dashboard h1 { color: var(--primary-color); margin-bottom: 20px; font-size: 28px; text-align: center; }
+        #dashboard h1 { color: var(--primary-color); margin-bottom: 10px; font-size: 32px; }
+        #dashboard p { color: #aaa; margin-top: 0; margin-bottom: 30px; }
         .stats-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px; 
-            width: 100%; max-width: 450px; margin: 20px 0; 
+            width: 100%; max-width: 400px; margin: 20px 0; 
         }
         .stat-box { 
             background: var(--card-bg); padding: 15px; border-radius: 12px; 
             text-align: center; box-shadow: 0 4px 12px var(--shadow-color); 
         }
-        .stat-box .label { font-size: 14px; color: #6c757d; margin-bottom: 5px; }
+        .stat-box .label { font-size: 14px; color: #aaa; margin-bottom: 5px; }
         .stat-box .value { font-size: 28px; font-weight: bold; }
-        #review-value { color: var(--warning-color); }
+        #review-value { color: var(--danger-color); }
         #mastered-value { color: var(--success-color); }
-
-        /* Topic Selector */
-        #topic-selector {
-            width: 100%; max-width: 450px; background: var(--card-bg);
-            padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px var(--shadow-color);
-            margin: 20px 0;
-        }
-        #topic-selector h2 { font-size: 18px; margin-top: 0; color: var(--primary-color); border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .topic-group { margin-bottom: 10px; }
-        .topic-group legend { font-weight: bold; margin-bottom: 5px; }
-        .topic-item { margin-bottom: 5px; display: block; }
-
         .start-btn { 
-            width: 100%; max-width: 450px; padding: 15px; font-size: 18px; 
+            width: 100%; max-width: 400px; padding: 18px; font-size: 20px; 
             font-weight: bold; cursor: pointer; border: none; border-radius: 12px; 
             background-color: var(--primary-color); color: white; margin-top: 10px; 
-            transition: background-color 0.2s;
+            transition: all 0.2s;
         }
-        .start-btn:hover { background-color: #0056b3; }
-        .start-btn:active { transform: translateY(1px); }
+        .start-btn:hover { background-color: #0088cc; }
+        .start-btn:active { transform: scale(0.98); }
         
         /* Study Screen */
         #study-screen { display: none; flex-direction: column; height: 100%; }
@@ -64,7 +51,7 @@
             padding: 15px; text-align: center; background: var(--card-bg); 
             box-shadow: 0 2px 4px var(--shadow-color); z-index: 10; position: relative;
         }
-        .progress-info { font-size: 16px; font-weight: 600; color: var(--primary-color); }
+        .progress-info { font-size: 18px; font-weight: 600; color: var(--primary-color); }
         #back-to-queue-btn {
             position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
             background: var(--primary-color); color: white; padding: 6px 12px;
@@ -83,7 +70,7 @@
         }
         .card-inner { 
             position: relative; width: 100%; height: 100%; 
-            transform-style: preserve-3d; transition: transform 0.6s ease, opacity 0.3s ease;
+            transform-style: preserve-3d; transition: transform 0.5s ease, opacity 0.2s;
             border-radius: 15px; box-shadow: 0 8px 25px var(--shadow-color);
         }
         .card.is-flipped .card-inner { transform: rotateY(180deg); }
@@ -94,56 +81,43 @@
             align-items: center; padding: 25px; box-sizing: border-box;
             background: var(--card-bg); text-align: center;
         }
-        .card-back { 
-            transform: rotateY(180deg); justify-content: flex-start; padding-top: 30px;
-        }
+        .card-back { transform: rotateY(180deg); justify-content: flex-start; padding-top: 30px; }
         .topic-tag { 
             position: absolute; top: 15px; left: 15px; 
-            background: rgba(0, 123, 255, 0.1); color: var(--primary-color); 
+            background: rgba(0, 170, 255, 0.2); color: var(--primary-color); 
             font-size: 12px; padding: 6px 12px; border-radius: 20px; font-weight: 600;
         }
-        .question { font-size: 18px; font-weight: 600; line-height: 1.4; color: var(--text-color); margin-top: 10px; }
-        .answer { font-size: 20px; font-weight: bold; line-height: 1.3; color: var(--text-color); margin-bottom: 20px; }
+        .question { font-size: 20px; font-weight: 600; line-height: 1.5; margin-top: 10px; }
+        .answer { font-size: 22px; font-weight: bold; line-height: 1.4; margin-bottom: 20px; }
 
         .related-cards-container { margin-top: 15px; width: 100%; text-align: left; }
-        .related-cards-container h4 { font-size: 14px; color: #6c757d; margin: 0 0 10px 0; border-bottom: 1px solid #e9ecef; padding-bottom: 5px; }
-        .related-cards-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+        .related-cards-container h4 { font-size: 14px; color: #aaa; margin: 0 0 10px 0; border-bottom: 1px solid #444; padding-bottom: 5px; }
+        .related-cards-list { display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto; }
         .related-card-btn {
-            background-color: #f8f9fa; border: 1px solid #dee2e6; color: var(--primary-color);
+            background-color: #3a3a3a; border: 1px solid #555; color: var(--primary-color);
             padding: 8px 12px; border-radius: 8px; text-align: left;
             font-size: 13px; cursor: pointer; transition: background-color 0.2s;
             width: 100%; box-sizing: border-box;
         }
-        .related-card-btn:hover { background-color: #e9ecef; }
+        .related-card-btn:hover { background-color: #4a4a4a; }
         
-        .card-inner[data-status='new'] { border: 4px solid #e9ecef; }
-        .card-inner[data-status='learning'] { border: 4px solid var(--warning-color); }
-        .card-inner[data-status='reviewing'] { border: 4px solid var(--info-color); }
-        .card-inner[data-status='mastered'] { border: 4px solid var(--success-color); }
-        
-        /* Evaluation Buttons (SRS) */
+        /* Evaluation Buttons */
         .eval-footer { 
-            position: fixed; bottom: 0; left: 0; right: 0; padding: 15px;
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 100;
-            display: none; justify-content: space-between; gap: 10px;
-            padding-bottom: calc(15px + env(safe-area-inset-bottom));
-            grid-template-columns: 1fr 1fr; display: none;
+            position: fixed; bottom: 0; left: 0; right: 0; padding: 20px;
+            background: rgba(44, 44, 44, 0.8); backdrop-filter: blur(10px); z-index: 100;
+            display: none; justify-content: space-around; gap: 15px;
+            padding-bottom: calc(20px + env(safe-area-inset-bottom));
         }
-        .eval-footer.show { 
-            display: grid; animation: slideUp 0.3s ease-out;
-        }
+        .eval-footer.show { display: flex; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .eval-btn { 
-            padding: 12px; font-size: 14px; font-weight: bold; 
+            flex: 1; padding: 20px; font-size: 20px; font-weight: bold; 
             border: none; border-radius: 12px; cursor: pointer;
-            transition: all 0.2s ease; text-align: center;
+            transition: all 0.2s ease;
         }
         .eval-btn:active { transform: scale(0.98); }
-        .btn-again { background-color: var(--danger-color); color: white; }
-        .btn-hard { background-color: var(--warning-color); color: white; }
-        .btn-good { background-color: var(--primary-color); color: white; }
-        .btn-easy { background-color: var(--success-color); color: white; }
-        .eval-btn .interval { font-size: 11px; display: block; opacity: 0.8; margin-top: 2px; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-success { background-color: var(--success-color); color: white; }
         
         #back-to-dash { 
             position: fixed; top: 15px; right: 15px; z-index: 200; 
@@ -151,52 +125,49 @@
             width: 40px; height: 40px; display: flex; justify-content: center; 
             align-items: center; font-weight: bold; cursor: pointer; 
         }
-        strong { color: #d63384; }
+        strong { color: #ffab40; }
     </style>
 </head>
 <body>
     <div class="app-container">
         <!-- Dashboard Screen -->
         <div id="dashboard">
-            <h1>地理 最終決戦</h1>
+            <h1>地理 超短期決戦</h1>
+            <p>苦手な問題をゼロにするまで、高速で周回しよう！</p>
             <div class="stats-grid">
-                <div class="stat-box"><div class="label">全問題数</div><div class="value" id="total-value">0</div></div>
-                <div class="stat-box"><div class="label">要復習</div><div class="value" id="review-value">0</div></div>
-                <div class="stat-box"><div class="label">学習中</div><div class="value" id="learning-value">0</div></div>
-                <div class="stat-box"><div class="label">完璧</div><div class="value" id="mastered-value">0</div></div>
+                <div class="stat-box">
+                    <div class="label">全問題数</div>
+                    <div class="value" id="total-value">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">要復習</div>
+                    <div class="value" id="review-value">0</div>
+                </div>
             </div>
-            
-            <div id="topic-selector">
-                <h2>学習範囲を選ぶ</h2>
-                <div id="topic-container"></div>
-            </div>
-
-            <button class="start-btn" id="start-new-btn">選択範囲で新規学習</button>
-            <button class="start-btn" id="start-review-btn" style="background-color: var(--warning-color);">復習カードを学習 (<span>0</span>問)</button>
+            <button class="start-btn" id="start-all-btn">全範囲を最終チェック</button>
+            <button class="start-btn" id="start-review-btn" style="background-color: #ff4757;">苦手だけを潰す</button>
             <button class="start-btn" id="reset-progress" style="margin-top:20px; background-color: #6c757d; font-size: 14px;">学習記録をリセット</button>
         </div>
 
         <!-- Study Screen -->
         <div id="study-screen">
             <div class="study-header">
-                <div id="back-to-queue-btn">← 学習に戻る</div>
+                <div id="back-to-queue-btn">← 寄り道中...</div>
                 <div class="progress-info" id="progress-info"></div>
             </div>
             <div class="card-area" id="card-area"></div>
             <div id="back-to-dash" title="ダッシュボードに戻る">✕</div>
             
             <div class="eval-footer" id="eval-footer">
-                <button class="eval-btn btn-again" id="eval-again">もう1回 <span class="interval"><10分</span></button>
-                <button class="eval-btn btn-hard" id="eval-hard">難しい <span class="interval"></span></button>
-                <button class="eval-btn btn-good" id="eval-good">順調 <span class="interval"></span></button>
-                <button class="eval-btn btn-easy" id="eval-easy">簡単 <span class="interval"></span></button>
+                <button class="eval-btn btn-danger" id="eval-review">わからん</button>
+                <button class="eval-btn btn-success" id="eval-mastered">わかった</button>
             </div>
         </div>
     </div>
 
     <script>
-    // === データ定義 (階層的トピックと関連カードID) ===
     const initialCardData = [
+        // (前回のコードと同じデータなので省略)
         // --- 地形 ---
         { topic: "地形/氷河地形", q: "氷河の侵食でできたU字谷に海水が侵入してできた海岸地形は？", a: "<strong>フィヨルド</strong>", related: [1, 2] },
         { topic: "地形/氷河地形", q: "氷河が山頂付近を削ってできた、お椀型の谷を何というか？", a: "<strong>カール（圏谷）</strong>", related: [0, 2] },
@@ -283,278 +254,212 @@
     ];
 
     document.addEventListener('DOMContentLoaded', () => {
-        // === アプリケーション全体を管理するオブジェクト ===
-        const GeoZettel = {
-            // --- 定数 ---
-            STORAGE_KEY: 'geoFinalBattleData_srs_v1',
-            SRS_CONFIG: {
-                AGAIN: 0, HARD: 1, GOOD: 2, EASY: 3,
-                DEFAULT_EASE: 2.5,
-                INTERVALS: {
-                    NEW: [1, 10], // [Again, Good] in minutes
-                    LEARNING: { // In days
-                        '1': [1, 2, 3, 4], // Hard, Good, Easy from Again
-                        '2': [1, 3, 5, 7], // Hard, Good, Easy from Hard
-                        '3': [2, 5, 8, 12], // etc.
-                    }
-                }
-            },
+        const App = {
+            cardData: [],
+            cardStates: [],
+            studyQueue: [],
+            sessionReviewQueue: [],
+            currentIndex: 0,
+            currentCard: null,
+            studyContextStack: [],
+            isTransitioning: false,
+            STORAGE_KEY: 'geoCrammingModeData_v1',
 
-            // --- 状態 ---
-            state: {
-                cardData: [],
-                cardStates: {}, // オブジェクト形式に変更
-                studyQueue: [],
-                currentIndex: 0,
-                currentCard: null,
-                isTransitioning: false,
-                studyContextStack: [],
-            },
-
-            // --- DOM要素 ---
-            elements: {},
-
-            // --- 初期化 ---
             init() {
-                this.elements = {
+                this.cacheDOM();
+                this.cardData = initialCardData.map((card, index) => ({ ...card, id: index }));
+                this.loadCardStates();
+                this.updateDashboard();
+                this.bindEvents();
+                this.showDashboard();
+            },
+
+            cacheDOM() {
+                this.dom = {
                     dashboard: document.getElementById('dashboard'),
                     studyScreen: document.getElementById('study-screen'),
                     cardArea: document.getElementById('card-area'),
                     evalFooter: document.getElementById('eval-footer'),
                     progressInfo: document.getElementById('progress-info'),
                     backToQueueBtn: document.getElementById('back-to-queue-btn'),
-                    topicContainer: document.getElementById('topic-container'),
-                    startNewBtn: document.getElementById('start-new-btn'),
+                    startAllBtn: document.getElementById('start-all-btn'),
                     startReviewBtn: document.getElementById('start-review-btn'),
                     resetProgressBtn: document.getElementById('reset-progress'),
                     backToDashBtn: document.getElementById('back-to-dash'),
-                    evalButtons: {
-                        again: document.getElementById('eval-again'),
-                        hard: document.getElementById('eval-hard'),
-                        good: document.getElementById('eval-good'),
-                        easy: document.getElementById('eval-easy'),
-                    }
+                    evalReviewBtn: document.getElementById('eval-review'),
+                    evalMasteredBtn: document.getElementById('eval-mastered'),
                 };
-                
-                this.state.cardData = initialCardData.map((card, index) => ({ ...card, id: index }));
-                
-                this.loadCardStates();
-                this.buildTopicSelector();
-                this.updateDashboard();
-                this.bindEventListeners();
-
-                this.showDashboard();
             },
 
-            // --- イベントリスナー設定 ---
-            bindEventListeners() {
-                this.elements.startNewBtn.addEventListener('click', () => this.startStudy('new'));
-                this.elements.startReviewBtn.addEventListener('click', () => this.startStudy('review'));
-                this.elements.resetProgressBtn.addEventListener('click', () => this.resetProgress());
-                this.elements.backToDashBtn.addEventListener('click', () => this.showDashboard());
-                this.elements.backToQueueBtn.addEventListener('click', () => this.returnFromJump());
-
-                Object.values(this.elements.evalButtons).forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const quality = e.currentTarget.id.replace('eval-', '');
-                        this.evaluateCard(quality);
-                    });
-                });
+            bindEvents() {
+                this.dom.startAllBtn.addEventListener('click', () => this.startStudy('all'));
+                this.dom.startReviewBtn.addEventListener('click', () => this.startStudy('review'));
+                this.dom.resetProgressBtn.addEventListener('click', () => this.resetProgress());
+                this.dom.backToDashBtn.addEventListener('click', () => this.showDashboard());
+                this.dom.backToQueueBtn.addEventListener('click', () => this.returnFromJump());
+                this.dom.evalReviewBtn.addEventListener('click', () => this.evaluateCard('review'));
+                this.dom.evalMasteredBtn.addEventListener('click', () => this.evaluateCard('mastered'));
             },
-            
-            // --- データ管理 ---
+
             loadCardStates() {
-                let savedStates;
+                let savedData;
                 try {
-                    savedStates = JSON.parse(localStorage.getItem(this.STORAGE_KEY));
-                } catch (e) {
-                    console.error("ローカルストレージの読み込みに失敗:", e);
-                    savedStates = null;
-                }
-                
-                // データ構造が変更された場合や、カード数が変更された場合に対応
-                this.state.cardStates = {};
-                this.state.cardData.forEach(card => {
-                    const saved = savedStates ? savedStates[card.id] : null;
-                    if (saved && 'nextReview' in saved) {
-                        this.state.cardStates[card.id] = saved;
-                    } else {
-                        this.state.cardStates[card.id] = this.createInitialState(card.id);
+                    savedData = JSON.parse(localStorage.getItem(this.STORAGE_KEY));
+                    if (!Array.isArray(savedData) || savedData.length !== this.cardData.length) {
+                        savedData = null; // データが不正なら初期化
                     }
-                });
+                } catch (e) {
+                    savedData = null;
+                }
+                this.cardStates = savedData || this.cardData.map(card => ({ id: card.id, status: 'review' }));
                 this.saveCardStates();
             },
 
             saveCardStates() {
                 try {
-                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state.cardStates));
-                } catch (e) {
-                    console.error("ローカルストレージへの保存に失敗:", e);
-                }
-            },
-
-            createInitialState(id) {
-                return {
-                    id: id,
-                    status: 'new', // new, learning, reviewing, mastered
-                    interval: 0, // days
-                    easeFactor: this.SRS_CONFIG.DEFAULT_EASE,
-                    nextReview: null, // timestamp
-                };
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cardStates));
+                } catch (e) { console.error("Save failed:", e); }
             },
 
             resetProgress() {
-                if (confirm('⚠️ 警告\n\nすべての学習記録がリセットされます。\nよろしいですか？')) {
-                    this.state.cardData.forEach(card => {
-                        this.state.cardStates[card.id] = this.createInitialState(card.id);
-                    });
+                if (confirm('⚠️ すべての学習記録がリセットされます。よろしいですか？')) {
+                    this.cardStates = this.cardData.map(card => ({ id: card.id, status: 'review' }));
                     this.saveCardStates();
                     this.updateDashboard();
                     alert('学習記録をリセットしました。');
                 }
             },
 
-            // --- UI更新 ---
             updateDashboard() {
-                const now = Date.now();
-                let reviewCount = 0;
-                let learningCount = 0;
-                let masteredCount = 0;
-
-                Object.values(this.state.cardStates).forEach(s => {
-                    if (s.nextReview && s.nextReview <= now) {
-                        reviewCount++;
-                    } else if (s.status === 'learning' || s.status === 'reviewing') {
-                        learningCount++;
-                    } else if (s.status === 'mastered') {
-                        masteredCount++;
-                    }
-                });
-                
-                document.getElementById('total-value').textContent = this.state.cardData.length;
+                document.getElementById('total-value').textContent = this.cardData.length;
+                const reviewCount = this.cardStates.filter(s => s.status === 'review').length;
                 document.getElementById('review-value').textContent = reviewCount;
-                this.elements.startReviewBtn.querySelector('span').textContent = reviewCount;
-                document.getElementById('learning-value').textContent = learningCount;
-                document.getElementById('mastered-value').textContent = masteredCount;
-            },
-            
-            buildTopicSelector() {
-                const topics = {};
-                this.state.cardData.forEach(card => {
-                    const [main, sub] = card.topic.split('/');
-                    if (!topics[main]) {
-                        topics[main] = new Set();
-                    }
-                    if (sub) {
-                        topics[main].add(sub);
-                    }
-                });
-
-                let html = '';
-                for (const mainTopic in topics) {
-                    html += `<fieldset class="topic-group"><legend>${mainTopic}</legend>`;
-                    if (topics[mainTopic].size > 0) {
-                        [...topics[mainTopic]].sort().forEach(subTopic => {
-                            const topicId = `${mainTopic}/${subTopic}`;
-                            html += `<label class="topic-item"><input type="checkbox" name="topic" value="${topicId}"> ${subTopic}</label>`;
-                        });
-                    } else {
-                         html += `<label class="topic-item"><input type="checkbox" name="topic" value="${mainTopic}"> ${mainTopic}</label>`;
-                    }
-                    html += `</fieldset>`;
-                }
-                this.elements.topicContainer.innerHTML = html;
             },
 
             updateProgress() {
-                if (this.state.studyContextStack.length > 0) {
-                    this.elements.progressInfo.textContent = '関連カードを学習中...';
-                } else if (this.state.studyQueue.length > 0) {
-                    this.elements.progressInfo.textContent = `${this.state.currentIndex + 1} / ${this.state.studyQueue.length}`;
+                if (this.studyContextStack.length > 0) {
+                    this.dom.progressInfo.textContent = `寄り道中...`;
                 } else {
-                    this.elements.progressInfo.textContent = '';
+                    const total = this.studyQueue.length + this.sessionReviewQueue.length;
+                    const remaining = total - this.currentIndex;
+                    this.dom.progressInfo.textContent = `残り ${remaining} / ${total} 問`;
                 }
             },
 
-            // --- 学習フロー ---
             startStudy(type) {
-                let queue = [];
-                if (type === 'new') {
-                    const selectedTopics = [...document.querySelectorAll('#topic-selector input:checked')].map(cb => cb.value);
-                    if (selectedTopics.length === 0) {
-                        alert('学習するトピックを1つ以上選択してください。');
-                        return;
-                    }
-                    queue = Object.values(this.state.cardStates)
-                        .filter(s => s.status === 'new' && selectedTopics.some(t => this.state.cardData[s.id].topic.startsWith(t)))
-                        .map(s => s.id);
+                if (type === 'all') {
+                    this.studyQueue = this.cardData.map(c => c.id);
                 } else { // review
-                    const now = Date.now();
-                    queue = Object.values(this.state.cardStates)
-                        .filter(s => s.status !== 'new' && s.nextReview && s.nextReview <= now)
-                        .map(s => s.id);
+                    this.studyQueue = this.cardStates.filter(s => s.status === 'review').map(s => s.id);
                 }
-
-                if (queue.length === 0) {
-                    alert(type === 'new' ? '選択された範囲に未学習のカードはありません。' : '現在、復習するカードはありません！');
+                
+                if (this.studyQueue.length === 0) {
+                    alert(type === 'review' ? '🎉 おめでとう！苦手な問題はありません！' : '学習対象がありません。');
                     return;
                 }
-                
-                this.state.studyQueue = this.shuffleArray(queue);
-                this.state.currentIndex = 0;
-                this.state.studyContextStack = [];
-                this.elements.backToQueueBtn.style.display = 'none';
 
-                this.elements.dashboard.style.display = 'none';
-                this.elements.studyScreen.style.display = 'flex';
+                this.studyQueue = this.shuffleArray(this.studyQueue);
+                this.sessionReviewQueue = [];
+                this.currentIndex = 0;
+                this.studyContextStack = [];
+                this.dom.backToQueueBtn.style.display = 'none';
+
+                this.dom.dashboard.style.display = 'none';
+                this.dom.studyScreen.style.display = 'flex';
+                this.renderCard(this.studyQueue[this.currentIndex]);
+            },
+
+            evaluateCard(status) {
+                if (this.isTransitioning) return;
+                this.isTransitioning = true;
                 
-                this.renderCard(this.state.studyQueue[this.state.currentIndex]);
+                const cardId = this.studyQueue[this.currentIndex];
+                const cardState = this.cardStates.find(s => s.id === cardId);
+                cardState.status = status;
+
+                if (status === 'review') {
+                    this.sessionReviewQueue.push(cardId);
+                }
+                
+                this.saveCardStates();
+                this.dom.evalFooter.classList.remove('show');
+                this.proceedToNextCard();
+            },
+
+            proceedToNextCard() {
+                this.currentIndex++;
+                
+                if (this.currentCard) {
+                    this.currentCard.querySelector('.card-inner').style.opacity = '0';
+                }
+                
+                setTimeout(() => {
+                    this.isTransitioning = false;
+                    let nextCardId;
+                    if (this.currentIndex < this.studyQueue.length) {
+                        nextCardId = this.studyQueue[this.currentIndex];
+                    } else {
+                        // 1周目が終わったら、そのセッションで間違えた問題に移る
+                        this.studyQueue = this.shuffleArray(this.sessionReviewQueue);
+                        this.sessionReviewQueue = [];
+                        this.currentIndex = 0;
+                        nextCardId = this.studyQueue[this.currentIndex];
+                    }
+                    
+                    if (nextCardId !== undefined) {
+                        this.renderCard(nextCardId);
+                    } else {
+                        this.showCompletionMessage();
+                    }
+                }, 200);
             },
 
             showCompletionMessage() {
-                alert('🎉 セッション完了！\n\nダッシュボードで次の学習を確認しましょう。');
+                const remainingReview = this.cardStates.filter(s => s.status === 'review').length;
+                let message = '🎉 セッション完了！\n\n';
+                if (remainingReview > 0) {
+                    message += `まだ ${remainingReview} 問の苦手が残っています。\n「苦手だけを潰す」で完璧にしよう！`;
+                } else {
+                    message += '全問クリア！素晴らしい！自信を持ってテストに臨もう！';
+                }
+                alert(message);
                 this.showDashboard();
             },
 
             showDashboard() {
-                this.state.isTransitioning = false;
-                this.state.studyContextStack = [];
-                this.elements.dashboard.style.display = 'flex';
-                this.elements.studyScreen.style.display = 'none';
-                this.elements.evalFooter.classList.remove('show');
+                this.isTransitioning = false;
+                this.studyContextStack = [];
+                this.dom.dashboard.style.display = 'flex';
+                this.dom.studyScreen.style.display = 'none';
+                this.dom.evalFooter.classList.remove('show');
                 
-                const existingCard = this.elements.cardArea.querySelector('.card');
+                const existingCard = this.dom.cardArea.querySelector('.card');
                 if (existingCard) {
                     if (existingCard._eventCleanup) existingCard._eventCleanup();
                     existingCard.remove();
                 }
-                this.state.currentCard = null;
+                this.currentCard = null;
                 this.updateDashboard();
             },
-            
-            // --- カード表示・操作 ---
-            renderCard(cardId, isJump = false) {
-                if (cardId === undefined) {
-                    if (!isJump) this.showCompletionMessage();
-                    return;
-                }
 
-                const existingCard = this.elements.cardArea.querySelector('.card');
+            renderCard(cardId, isJump = false) {
+                if (cardId === undefined) return;
+
+                const existingCard = this.dom.cardArea.querySelector('.card');
                 if (existingCard) {
                     if (existingCard._eventCleanup) existingCard._eventCleanup();
                     existingCard.remove();
                 }
                 
-                this.elements.evalFooter.classList.remove('show');
-                if (isJump) this.elements.backToQueueBtn.style.display = 'block';
+                this.dom.evalFooter.classList.remove('show');
+                if (isJump) this.dom.backToQueueBtn.style.display = 'block';
 
-                const state = this.state.cardStates[cardId];
-                const data = this.state.cardData[cardId];
+                const data = this.cardData[cardId];
                 
                 const cardElement = document.createElement('div');
                 cardElement.className = 'card';
                 cardElement.innerHTML = `
-                    <div class="card-inner" data-status="${state.status}">
+                    <div class="card-inner">
                         <div class="card-face card-front">
                             <span class="topic-tag">${data.topic}</span>
                             <div class="question">${data.q}</div>
@@ -569,8 +474,8 @@
                     </div>
                 `;
                 
-                this.elements.cardArea.appendChild(cardElement);
-                this.state.currentCard = cardElement;
+                this.dom.cardArea.appendChild(cardElement);
+                this.currentCard = cardElement;
                 
                 this.setupCardEvents(cardElement, cardId, isJump);
                 this.updateProgress();
@@ -580,16 +485,12 @@
                 const handleCardClick = (e) => {
                     e.preventDefault();
                     if (card.classList.contains('is-flipped')) return;
-                    
                     card.classList.add('is-flipped');
                     
                     setTimeout(() => {
-                        if (!isJump) {
-                           this.updateEvalButtons(cardId);
-                           this.elements.evalFooter.classList.add('show');
-                        }
+                        if (!isJump) this.dom.evalFooter.classList.add('show');
                         this.renderRelatedCards(cardId);
-                    }, 300);
+                    }, 250);
                 };
 
                 card.addEventListener('click', handleCardClick);
@@ -597,16 +498,11 @@
             },
 
             renderRelatedCards(cardId) {
-                const listContainer = this.state.currentCard.querySelector('.related-cards-list');
+                const listContainer = this.currentCard.querySelector('.related-cards-list');
                 if (!listContainer) return;
 
-                const currentData = this.state.cardData[cardId];
-                let relatedIds = new Set(currentData.related || []);
-                
-                this.state.cardData
-                    .filter(c => c.topic === currentData.topic && c.id !== cardId)
-                    .slice(0, 3)
-                    .forEach(c => relatedIds.add(c.id));
+                const currentData = this.cardData[cardId];
+                const relatedIds = new Set(currentData.related || []);
 
                 if (relatedIds.size === 0) {
                     listContainer.innerHTML = '関連カードはありません';
@@ -615,7 +511,7 @@
 
                 listContainer.innerHTML = '';
                 relatedIds.forEach(id => {
-                    const relatedData = this.state.cardData[id];
+                    const relatedData = this.cardData[id];
                     if (relatedData) {
                         const btn = document.createElement('button');
                         btn.className = 'related-card-btn';
@@ -630,137 +526,39 @@
             },
 
             jumpToCard(targetId) {
-                if (this.state.studyContextStack.length === 0) {
-                    this.state.studyContextStack.push({ queue: this.state.studyQueue, index: this.state.currentIndex });
+                if (this.studyContextStack.length === 0) {
+                    this.studyContextStack.push({ 
+                        queue: this.studyQueue, 
+                        reviewQueue: this.sessionReviewQueue, 
+                        index: this.currentIndex 
+                    });
                 }
                 this.renderCard(targetId, true);
             },
 
             returnFromJump() {
-                const lastContext = this.state.studyContextStack.pop();
+                const lastContext = this.studyContextStack.pop();
                 if (lastContext) {
-                    this.state.studyQueue = lastContext.queue;
-                    this.state.currentIndex = lastContext.index;
-                    this.elements.backToQueueBtn.style.display = 'none';
-                    this.renderCard(this.state.studyQueue[this.state.currentIndex]);
+                    this.studyQueue = lastContext.queue;
+                    this.sessionReviewQueue = lastContext.reviewQueue;
+                    this.currentIndex = lastContext.index;
+                    this.dom.backToQueueBtn.style.display = 'none';
+                    this.renderCard(this.studyQueue[this.currentIndex], false);
                 }
             },
 
-            // --- SRS評価ロジック ---
-            updateEvalButtons(cardId) {
-                const state = this.state.cardStates[cardId];
-                const format = this.formatInterval;
-
-                let hardInterval, goodInterval, easyInterval;
-                if(state.status === 'new' || (state.status === 'learning' && state.interval < 1)) {
-                    goodInterval = 10; // 10 minutes
-                    hardInterval = 1; // 1 minute
-                    easyInterval = 1 * 24 * 60; // 1 day
-                    this.elements.evalButtons.again.querySelector('.interval').textContent = `<1分`;
-                    this.elements.evalButtons.hard.querySelector('.interval').textContent = `${format(hardInterval, 'm')}`;
-                    this.elements.evalButtons.good.querySelector('.interval').textContent = `${format(goodInterval, 'm')}`;
-                    this.elements.evalButtons.easy.querySelector('.interval').textContent = `${format(easyInterval, 'm')}`;
-                } else {
-                    goodInterval = Math.max(1, Math.round(state.interval * state.easeFactor));
-                    hardInterval = Math.max(1, Math.round(state.interval * 1.2));
-                    easyInterval = Math.max(1, Math.round(goodInterval * 1.3));
-                    this.elements.evalButtons.again.querySelector('.interval').textContent = `<10分`;
-                    this.elements.evalButtons.hard.querySelector('.interval').textContent = `${format(hardInterval, 'd')}`;
-                    this.elements.evalButtons.good.querySelector('.interval').textContent = `${format(goodInterval, 'd')}`;
-                    this.elements.evalButtons.easy.querySelector('.interval').textContent = `${format(easyInterval, 'd')}`;
-                }
-            },
-            
-            evaluateCard(quality) {
-                if (this.state.currentIndex >= this.state.studyQueue.length || this.state.isTransitioning) return;
-                
-                this.state.isTransitioning = true;
-                const cardId = this.state.studyQueue[this.state.currentIndex];
-                const state = this.state.cardStates[cardId];
-
-                const now = Date.now();
-                let newInterval;
-                const MIN_TO_MS = 60 * 1000;
-                const DAY_TO_MS = 24 * 60 * MIN_TO_MS;
-                
-                // SM-2 アルゴリズムの簡易版
-                if (quality === 'again') {
-                    state.easeFactor = Math.max(1.3, state.easeFactor - 0.2);
-                    state.interval = 0; // Reset
-                    state.status = 'learning';
-                    state.nextReview = now + 10 * MIN_TO_MS;
-                } else {
-                    if (state.status === 'new' || state.status === 'learning') {
-                         if (quality === 'hard') {
-                           state.nextReview = now + 1 * MIN_TO_MS;
-                         } else if (quality === 'good') {
-                           state.nextReview = now + 10 * MIN_TO_MS;
-                           state.status = 'reviewing';
-                           state.interval = 1; // Start with 1 day interval
-                         } else { // easy
-                           state.nextReview = now + 4 * DAY_TO_MS;
-                           state.status = 'mastered';
-                           state.interval = 4;
-                         }
-                    } else { // reviewing or mastered
-                        if (quality === 'hard') {
-                            state.easeFactor = Math.max(1.3, state.easeFactor - 0.15);
-                            newInterval = Math.round(state.interval * 1.2);
-                        } else if (quality === 'good') {
-                             newInterval = Math.round(state.interval * state.easeFactor);
-                        } else { // easy
-                            state.easeFactor += 0.15;
-                            newInterval = Math.round(state.interval * state.easeFactor * 1.3);
-                        }
-                        state.interval = newInterval;
-                        state.nextReview = now + newInterval * DAY_TO_MS;
-                    }
-                    if(state.interval > 30) state.status = 'mastered'; // 30日以上なら完璧
-                }
-
-                this.saveCardStates();
-                this.elements.evalFooter.classList.remove('show');
-                this.proceedToNextCard();
-            },
-
-            proceedToNextCard() {
-                this.state.currentIndex++;
-                
-                if (this.state.currentCard) {
-                    this.state.currentCard.querySelector('.card-inner').style.opacity = '0';
-                }
-                
-                setTimeout(() => {
-                    this.state.isTransitioning = false;
-                    this.renderCard(this.state.studyQueue[this.state.currentIndex]);
-                }, 250);
-            },
-            
-            // --- ヘルパー関数 ---
             shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
+                let currentIndex = array.length, randomIndex;
+                while (currentIndex != 0) {
+                    randomIndex = Math.floor(Math.random() * currentIndex);
+                    currentIndex--;
+                    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
                 }
                 return array;
-            },
-
-            formatInterval(value, unit) {
-                if (unit === 'm') {
-                    if(value < 60) return `${value}分`;
-                    if(value < 24*60) return `${Math.round(value/60)}時間`;
-                    return `${Math.round(value/(24*60))}日`;
-                }
-                if (unit === 'd') {
-                    if(value < 30) return `${value}日`;
-                    if(value < 365) return `${Math.round(value/30)}ヶ月`;
-                    return `${Math.round(value/365)}年`;
-                }
-                return value;
             }
         };
 
-        GeoZettel.init();
+        App.init();
     });
     </script>
 </body>
